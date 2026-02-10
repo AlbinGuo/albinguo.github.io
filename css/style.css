@@ -413,7 +413,13 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background: #a0cfff;
+    background: repeating-linear-gradient(
+        to right,
+        #a0cfff 0px,
+        #a0cfff 3px,
+        transparent 3px,
+        transparent 6px
+    );
     transform: translateY(-50%);
 }
 
@@ -424,7 +430,13 @@ body {
     top: 0;
     bottom: 0;
     width: 1px;
-    background: #a0cfff;
+    background: repeating-linear-gradient(
+        to bottom,
+        #a0cfff 0px,
+        #a0cfff 3px,
+        transparent 3px,
+        transparent 6px
+    );
     transform: translateX(-50%);
 }
 
