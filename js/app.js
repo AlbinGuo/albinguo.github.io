@@ -293,7 +293,7 @@ const App = {
     
     // 加载保存的纸张类型
     loadPaperType() {
-        const savedType = localStorage.getItem('paperType') || 'writing';
+        const savedType = localStorage.getItem('paperType') || 'tian';
         const btn = document.querySelector(`.paper-btn[data-paper="${savedType}"]`);
         if (btn) {
             document.querySelectorAll('.paper-btn').forEach(b => b.classList.remove('active'));
