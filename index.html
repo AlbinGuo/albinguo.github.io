@@ -3,160 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能作文批改助手</title>
+    <title>智能作文批改系统</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="app-container">
         <!-- 顶部导航 -->
         <header class="header">
-            <div class="logo">
-                <span class="logo-icon">✏</span>
-                <span class="logo-text">智能作文批改</span>
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">✏</span>
+                    <span class="logo-text">智能作文批改</span>
+                </div>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav-link active">批改</a>
-                <a href="history.html" class="nav-link">历史记录</a>
+                <a href="#" class="nav-link active" data-page="edit">作文批改</a>
+                <a href="#" class="nav-link" data-page="history">历史批改</a>
+                <a href="#" class="nav-link" data-page="help">使用帮助</a>
             </nav>
         </header>
 
         <!-- 主内容区 -->
-        <main class="main">
-            <!-- 左侧：输入区 -->
-            <section class="input-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>作文内容</h2>
-                        <span class="char-counter"><span id="charCount">0</span> 字</span>
-                    </div>
-                    
-                    <div class="upload-zone" id="uploadZone">
-                        <input type="file" id="fileInput" accept=".txt" hidden>
-                        <div class="upload-content">
-                            <div class="upload-icon">📁</div>
-                            <p>点击选择 txt 文件</p>
-                            <span class="upload-hint">支持 UTF-8 编码的纯文本文件</span>
+        <main class="main-content" id="mainContent">
+            <!-- 批改页面 -->
+            <section class="grading-page" id="gradingPage">
+                <div class="content-wrapper">
+                    <!-- 左侧：作文原文区 -->
+                    <div class="essay-panel">
+                        <div class="panel-header">
+                            <h2>📝 作文原文</h2>
+                            <div class="essay-meta">
+                                <input type="text" id="essayTitle" placeholder="输入作文标题..." class="title-input">
+                                <span class="char-count" id="charCount">0 字</span>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <textarea id="essayInput" placeholder="在此粘贴或输入您的作文内容..."></textarea>
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn-secondary" id="clearBtn">清空</button>
+                            <button class="btn-primary" id="gradeBtn">
+                                <span>开始批改</span>
+                            </button>
                         </div>
                     </div>
-                    
-                    <div style="text-align: center; margin-bottom: 0.75rem;">
-                        <button type="button" class="btn-secondary" id="selectFileBtn" style="width: auto; padding: 0.5rem 1.5rem;">
-                            📂 选择文件
-                        </button>
-                    </div>
 
-                    <textarea id="essayInput" placeholder="在此输入或粘贴作文内容（不少于200字）..."></textarea>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2>批改设置</h2>
-                    </div>
-                    <div class="settings">
-                        <div class="setting-row">
-                            <label>作文类型</label>
-                            <select id="essayType">
-                                <option value="narrative">记叙文</option>
-                                <option value="argumentative">议论文</option>
-                                <option value="expository">说明文</option>
-                                <option value="other">其他</option>
-                            </select>
+                    <!-- 右侧：批改面板区 -->
+                    <div class="grading-panel">
+                        <!-- 第一栏：综合评价区 -->
+                        <div class="evaluation-panel" id="evaluationPanel">
+                            <div class="eval-header">
+                                <h3>📊 综合评价</h3>
+                            </div>
+                            <div class="eval-body">
+                                <div class="essay-title-display" id="essayTitleDisplay">
+                                    <span class="label">作文标题：</span>
+                                    <span class="value">未命名</span>
+                                </div>
+                                <div class="score-display">
+                                    <div class="stars" id="starRating">
+                                        <span class="star filled">★</span>
+                                        <span class="star filled">★</span>
+                                        <span class="star filled">★</span>
+                                        <span class="star filled">★</span>
+                                        <span class="star">★</span>
+                                    </div>
+                                    <div class="score-value">
+                                        <span id="totalScore">0</span>
+                                        <span class="unit">分</span>
+                                    </div>
+                                </div>
+                                <div class="overall-comment" id="overallComment">
+                                    <p>提交作文后将显示综合评价</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="setting-row">
-                            <label>批改重点</label>
-                            <div class="checkbox-group">
-                                <label class="checkbox">
-                                    <input type="checkbox" checked data-focus="content">
-                                    <span>内容</span>
-                                </label>
-                                <label class="checkbox">
-                                    <input type="checkbox" checked data-focus="structure">
-                                    <span>结构</span>
-                                </label>
-                                <label class="checkbox">
-                                    <input type="checkbox" checked data-focus="language">
-                                    <span>语言</span>
-                                </label>
-                                <label class="checkbox">
-                                    <input type="checkbox" data-focus="style">
-                                    <span>文采</span>
-                                </label>
+
+                        <!-- 第二栏：旁批总评区 -->
+                        <div class="summary-panel" id="summaryPanel">
+                            <div class="panel-header">
+                                <h3>💬 批语总评</h3>
+                                <button class="toggle-btn" id="toggleSummary">收起 ▲</button>
+                            </div>
+                            <div class="panel-body" id="summaryBody">
+                                <ul class="summary-list" id="summaryList">
+                                    <li class="summary-item">
+                                        <span class="tag positive">✓ 优点</span>
+                                        <p>提交作文后将显示优点总结</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 第三栏：详细批改区 -->
+                        <div class="detail-panel" id="detailPanel">
+                            <div class="panel-header">
+                                <h3>📋 详细批改</h3>
+                                <div class="filter-tabs">
+                                    <button class="tab active" data-filter="all">全部</button>
+                                    <button class="tab" data-filter="error">✗ 错误</button>
+                                    <button class="tab" data-filter="suggest">🔧 建议</button>
+                                    <button class="tab" data-filter="praise">✓ 表扬</button>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div class="detail-list" id="detailList">
+                                    <div class="empty-state">
+                                        <p>提交作文后显示详细批改</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <button class="btn-primary" id="submitBtn">
-                    <span class="btn-text">开始批改</span>
-                    <span class="btn-loading" hidden>
-                        <span class="spinner"></span>
-                        批改中...
-                    </span>
-                </button>
-
-                <button class="btn-secondary" id="demoBtn">使用示例作文</button>
             </section>
 
-            <!-- 右侧：说明区 -->
-            <aside class="info-section">
-                <div class="card">
-                    <h3>使用说明</h3>
-                    <ol class="steps-list">
-                        <li>输入或上传您的作文</li>
-                        <li>选择作文类型和批改重点</li>
-                        <li>点击"开始批改"按钮</li>
-                        <li>查看评分、评语和建议</li>
-                    </ol>
+            <!-- 历史记录页面 -->
+            <section class="history-page hidden" id="historyPage">
+                <div class="history-container">
+                    <div class="history-header">
+                        <h2>📚 历史批改记录</h2>
+                        <button class="btn-secondary" id="clearHistoryBtn">清空历史</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <p>暂无历史记录</p>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <div class="card">
-                    <h3>功能特点</h3>
-                    <ul class="features-list">
-                        <li>
-                            <span class="feature-icon">⚡</span>
-                            <div>
-                                <strong>快速批改</strong>
-                                <p>数秒内获得评分和建议</p>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="feature-icon">📊</span>
-                            <div>
-                                <strong>多维分析</strong>
-                                <p>内容、结构、语言、文采</p>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="feature-icon">💡</span>
-                            <div>
-                                <strong>智能建议</strong>
-                                <p>针对性的修改意见</p>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="feature-icon">📁</span>
-                            <div>
-                                <strong>历史记录</strong>
-                                <p>保存批改历史</p>
-                            </div>
-                        </li>
-                    </ul>
+            <!-- 帮助页面 -->
+            <section class="help-page hidden" id="helpPage">
+                <div class="help-container">
+                    <h2>📖 使用帮助</h2>
+                    <div class="help-content">
+                        <div class="help-section">
+                            <h3>使用步骤</h3>
+                            <ol>
+                                <li>在左侧输入作文标题和内容</li>
+                                <li>点击"开始批改"按钮</li>
+                                <li>查看右侧的综合评价和详细批改</li>
+                                <li>可点击批改项查看原文对应位置</li>
+                                <li>可一键采纳修改建议</li>
+                            </ol>
+                        </div>
+                        <div class="help-section">
+                            <h3>批改说明</h3>
+                            <ul>
+                                <li><span class="tag error">✗ 语法错误</span> - 错别字、语病、标点问题</li>
+                                <li><span class="tag suggest">🔧 表达优化</span> - 用词、句式调整建议</li>
+                                <li><span class="tag content">💡 内容建议</span> - 细节补充、内容扩展</li>
+                                <li><span class="tag positive">✓ 表扬</span> - 亮点标注、肯定鼓励</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="card notice">
-                    <p><strong>声明：</strong>本系统使用规则匹配算法进行批改，仅供参考。建议结合教师专业意见使用。</p>
-                </div>
-            </aside>
+            </section>
         </main>
-
-        <!-- 底部 -->
-        <footer class="footer">
-            <p>© 2025 智能作文批改助手</p>
-        </footer>
     </div>
 
-    <!-- Toast 通知 -->
-    <div id="toast" class="toast"></div>
+    <!-- 批改设置弹窗 -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>批改设置</h3>
+                <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>批改模式</label>
+                    <div class="radio-group">
+                        <label class="radio">
+                            <input type="radio" name="mode" value="normal" checked>
+                            <span>普通模式</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="mode" value="strict">
+                            <span>严格模式</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="mode" value="encourage">
+                            <span>鼓励模式</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>重点关注</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox">
+                            <input type="checkbox" checked>
+                            <span>语法错误</span>
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" checked>
+                            <span>表达流畅度</span>
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox">
+                            <span>文学修辞</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="saveSettings">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast hidden" id="toast"></div>
 
     <script src="js/app.js"></script>
 </body>

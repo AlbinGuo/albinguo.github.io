@@ -1,438 +1,548 @@
-// 智能作文批改助手 - 主应用逻辑
+// 智能作文批改系统 - 主逻辑
 
 document.addEventListener('DOMContentLoaded', function() {
     App.init();
 });
 
 const App = {
-    elements: {},
+    data: null,
     
     init() {
         this.cacheElements();
         this.bindEvents();
+        this.loadHistory();
     },
     
     cacheElements() {
         this.elements = {
+            // 页面
+            gradingPage: document.getElementById('gradingPage'),
+            historyPage: document.getElementById('historyPage'),
+            helpPage: document.getElementById('helpPage'),
+            
+            // 作文输入
             essayInput: document.getElementById('essayInput'),
+            essayTitle: document.getElementById('essayTitle'),
             charCount: document.getElementById('charCount'),
-            fileInput: document.getElementById('fileInput'),
-            uploadZone: document.getElementById('uploadZone'),
-            selectFileBtn: document.getElementById('selectFileBtn'),
-            essayType: document.getElementById('essayType'),
-            submitBtn: document.getElementById('submitBtn'),
-            demoBtn: document.getElementById('demoBtn'),
+            gradeBtn: document.getElementById('gradeBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            
+            // 批改面板
+            essayTitleDisplay: document.getElementById('essayTitleDisplay'),
+            starRating: document.getElementById('starRating'),
+            totalScore: document.getElementById('totalScore'),
+            overallComment: document.getElementById('overallComment'),
+            summaryList: document.getElementById('summaryList'),
+            detailList: document.getElementById('detailList'),
+            
+            // 筛选标签
+            filterTabs: document.querySelectorAll('.filter-tab'),
+            
+            // 历史
+            historyList: document.getElementById('historyList'),
+            clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+            
+            // Toast
             toast: document.getElementById('toast')
         };
     },
     
     bindEvents() {
-        const { essayInput, fileInput, uploadZone, selectFileBtn, submitBtn, demoBtn } = this.elements;
+        // 导航切换
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchPage(link.dataset.page);
+            });
+        });
         
         // 字数统计
-        essayInput.addEventListener('input', () => this.updateCharCount());
-        
-        // 上传区域点击
-        uploadZone.addEventListener('click', () => fileInput.click());
-        
-        // 选择文件按钮点击
-        selectFileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            fileInput.click();
+        this.elements.essayInput.addEventListener('input', () => {
+            const count = this.elements.essayInput.value.length;
+            this.elements.charCount.textContent = count + ' 字';
         });
         
-        // 文件选择
-        fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-        
-        // 拖拽上传
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
+        // 清空
+        this.elements.clearBtn.addEventListener('click', () => {
+            this.elements.essayInput.value = '';
+            this.elements.essayTitle.value = '';
+            this.elements.charCount.textContent = '0 字';
+            this.resetGradingPanel();
         });
         
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
+        // 开始批改
+        this.elements.gradeBtn.addEventListener('click', () => this.startGrading());
+        
+        // 筛选标签
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                this.filterDetails(tab.dataset.filter);
+            });
         });
         
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) this.readFile(file);
-        });
-        
-        // 提交批改
-        submitBtn.addEventListener('click', () => this.submitEssay());
-        
-        // 示例作文
-        demoBtn.addEventListener('click', () => this.loadDemoEssay());
-    },
-    
-    updateCharCount() {
-        const count = this.elements.essayInput.value.length;
-        this.elements.charCount.textContent = count;
-    },
-    
-    handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (file) {
-            this.readFile(file);
-        }
-        // 清空input允许重新选择
-        e.target.value = '';
-    },
-    
-    readFile(file) {
-        const ext = file.name.split('.').pop().toLowerCase();
-        
-        if (ext !== 'txt') {
-            this.showToast('仅支持 txt 格式文件', 'error');
-            return;
-        }
-        
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const content = e.target.result.trim();
-            if (content.length > 0) {
-                this.elements.essayInput.value = content;
-                this.updateCharCount();
-                this.showToast(`已加载文件 "${file.name}"（${content.length}字）`, 'success');
-            } else {
-                this.showToast('文件内容为空', 'error');
+        // 清空历史
+        this.elements.clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('确定清空所有历史记录？')) {
+                localStorage.removeItem('gradingHistory');
+                this.loadHistory();
+                this.showToast('历史记录已清空');
             }
-        };
-        
-        reader.onerror = () => {
-            this.showToast('文件读取失败', 'error');
-        };
-        
-        reader.readAsText(file);
+        });
     },
     
-    loadDemoEssay() {
-        const essay = `那是一个阳光明媚的早晨，我背着书包去上学。走到半路，突然下起了大雨。我没有带伞，只好躲在路边的屋檐下等雨停。
-
-这时候，一个陌生的阿姨走过来，她手里撑着一把伞。她看到我狼狈的样子，微笑着问我："小朋友，你没带伞吗？我送你回家吧。"
-
-我有点犹豫，因为妈妈说过不要随便跟陌生人走。但是看着越下越大的雨，我最终还是点了点头。一路上，阿姨撑着伞，她的肩膀却湿了一大片。我这才发现，阿姨把伞都倾斜到我这边，自己的半边身子却淋湿了。
-
-到了家门口，我邀请阿姨进来喝杯水，但是她摆摆手说："不用了，我还要去上班呢。"说完，她就转身走进了雨中。
-
-我站在门口，看着阿姨渐渐远去的背影，心里涌起一股暖流。虽然雨水是凉的，但是我的心却是暖暖的。我想，等我长大了，我也要像这位阿姨一样，去帮助需要帮助的人。
-
-这件事让我明白了一个道理：人间自有真情在。只要我们每个人都献出一点爱，世界就会变得更加美好。`;
+    switchPage(page) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.toggle('active', link.dataset.page === page);
+        });
         
-        this.elements.essayInput.value = essay;
-        this.updateCharCount();
-        this.showToast('已加载示例作文', 'success');
+        this.elements.gradingPage.classList.toggle('hidden', page !== 'edit');
+        this.elements.historyPage.classList.toggle('hidden', page !== 'history');
+        this.elements.helpPage.classList.toggle('hidden', page !== 'help');
+        
+        if (page === 'history') {
+            this.loadHistory();
+        }
     },
     
-    submitEssay() {
+    startGrading() {
         const content = this.elements.essayInput.value.trim();
+        const title = this.elements.essayTitle.value.trim() || '未命名';
         
-        // 验证
         if (!content) {
-            this.showToast('请输入作文内容', 'error');
+            this.showToast('请输入作文内容');
             return;
         }
         
-        if (content.length < 200) {
-            this.showToast(`作文不少于200字，当前${content.length}字`, 'error');
+        if (content.length < 50) {
+            this.showToast('作文内容太短，请输入更多内容');
             return;
         }
-        
-        // 获取设置
-        const type = this.elements.essayType.value;
-        const focuses = Array.from(document.querySelectorAll('.checkbox-group input:checked'))
-            .map(cb => cb.dataset.focus);
-        
-        if (focuses.length === 0) {
-            this.showToast('请至少选择一个批改重点', 'error');
-            return;
-        }
-        
-        // 显示加载状态
-        this.setLoading(true);
         
         // 执行批改
-        setTimeout(() => {
-            try {
-                const result = Grading.process(content, type, focuses);
-                
-                // 保存数据到localStorage
-                localStorage.setItem('lastResult', JSON.stringify(result));
-                
-                const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
-                history.unshift(result);
-                if (history.length > 50) history.pop();
-                localStorage.setItem('gradingHistory', JSON.stringify(history));
-                
-                // 跳转到结果页（使用localStorage传递数据，避免URL过长）
-                window.location.href = 'result.html';
-            } catch (e) {
-                console.error('批改失败:', e);
-                this.showToast('批改失败: ' + e.message, 'error');
-                this.setLoading(false);
+        const result = Grading.process(content, title);
+        this.data = result;
+        
+        // 显示结果
+        this.displayResult(result);
+        
+        // 保存到历史
+        this.saveToHistory(result);
+        
+        this.showToast('批改完成');
+    },
+    
+    displayResult(result) {
+        // 标题
+        this.elements.essayTitleDisplay.innerHTML = `
+            <span class="label">作文标题：</span>
+            <span class="value">${result.title}</span>
+        `;
+        
+        // 分数
+        this.elements.totalScore.textContent = result.scores.overall;
+        
+        // 星级
+        const stars = this.elements.starRating.querySelectorAll('.star');
+        const filledCount = Math.round(result.scores.overall / 20);
+        stars.forEach((star, i) => {
+            star.classList.toggle('filled', i < filledCount);
+        });
+        
+        // 综合评语
+        this.elements.overallComment.innerHTML = `
+            <p><strong>【整体评价】</strong> ${result.comments.overall}</p>
+        `;
+        
+        // 总评列表
+        this.elements.summaryList.innerHTML = `
+            <li class="summary-item">
+                <span class="tag positive">✓ 优点</span>
+                <p>${result.comments.positive}</p>
+            </li>
+            <li class="summary-item">
+                <span class="tag suggest">💡 建议</span>
+                <p>${result.comments.suggestionsSummary}</p>
+            </li>
+        `;
+        
+        // 详细批改列表
+        this.renderDetails(result.annotations);
+    },
+    
+    renderDetails(annotations) {
+        this.currentAnnotations = annotations;
+        
+        this.elements.detailList.innerHTML = annotations.map((item, index) => `
+            <div class="detail-item ${item.type}" data-index="${index}" data-type="${item.type}">
+                <div class="detail-content">
+                    <span class="detail-number">${index + 1}</span>
+                    <span class="tag ${item.type}">${this.getTypeLabel(item.type)}</span>
+                    <span>${item.text}</span>
+                </div>
+                ${item.suggestion ? `<div class="detail-suggestion">建议修改：${item.suggestion}</div>` : ''}
+            </div>
+        `).join('');
+        
+        // 绑定点击事件
+        this.elements.detailList.querySelectorAll('.detail-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const index = parseInt(item.dataset.index);
+                this.highlightAnnotation(index);
+            });
+        });
+    },
+    
+    getTypeLabel(type) {
+        const labels = {
+            error: '✗ 错误',
+            suggest: '🔧 建议',
+            content: '💡 内容',
+            praise: '✓ 表扬'
+        };
+        return labels[type] || type;
+    },
+    
+    filterDetails(filter) {
+        if (!this.currentAnnotations) return;
+        
+        const items = this.elements.detailList.querySelectorAll('.detail-item');
+        items.forEach(item => {
+            const type = item.dataset.type;
+            if (filter === 'all' || type === filter) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
             }
-        }, 100);
+        });
     },
     
-    setLoading(loading) {
-        const { submitBtn } = this.elements;
-        const btnText = submitBtn.querySelector('.btn-text');
-        const btnLoading = submitBtn.querySelector('.btn-loading');
+    highlightAnnotation(index) {
+        const annotation = this.currentAnnotations[index];
+        if (!annotation) return;
         
-        if (loading) {
-            btnText.hidden = true;
-            btnLoading.hidden = false;
-            submitBtn.disabled = true;
-        } else {
-            btnText.hidden = false;
-            btnLoading.hidden = true;
-            submitBtn.disabled = false;
+        // 在输入框中滚动到对应位置
+        const textarea = this.elements.essayInput;
+        const startPos = annotation.start;
+        const endPos = annotation.end;
+        
+        textarea.focus();
+        textarea.setSelectionRange(startPos, endPos);
+        
+        // 滚动到视野
+        const lineHeight = 24;
+        const lines = textarea.value.substring(0, startPos).split('\n').length;
+        textarea.scrollTop = (lines - 1) * lineHeight - 100;
+        
+        // 临时高亮
+        textarea.blur();
+        setTimeout(() => textarea.focus(), 100);
+    },
+    
+    resetGradingPanel() {
+        this.elements.essayTitleDisplay.innerHTML = `
+            <span class="label">作文标题：</span>
+            <span class="value">未命名</span>
+        `;
+        this.elements.totalScore.textContent = '0';
+        this.elements.starRating.querySelectorAll('.star').forEach(s => s.classList.remove('filled'));
+        this.elements.overallComment.innerHTML = '<p>提交作文后将显示综合评价</p>';
+        this.elements.summaryList.innerHTML = `
+            <li class="summary-item">
+                <span class="tag positive">✓ 优点</span>
+                <p>提交作文后将显示优点总结</p>
+            </li>
+        `;
+        this.elements.detailList.innerHTML = '<div class="empty-state"><p>提交作文后显示详细批改</p></div>';
+        this.data = null;
+    },
+    
+    saveToHistory(result) {
+        const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
+        history.unshift(result);
+        if (history.length > 50) history.pop();
+        localStorage.setItem('gradingHistory', JSON.stringify(history));
+    },
+    
+    loadHistory() {
+        const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
+        
+        if (history.length === 0) {
+            this.elements.historyList.innerHTML = '<div class="empty-state"><p>暂无历史记录</p></div>';
+            return;
         }
+        
+        this.elements.historyList.innerHTML = history.map(item => {
+            const scoreClass = item.scores.overall >= 80 ? 'high' : item.scores.overall >= 60 ? 'medium' : 'low';
+            const date = new Date(item.timestamp).toLocaleDateString();
+            
+            return `
+                <div class="history-item" data-id="${item.id}">
+                    <div class="history-info">
+                        <h4>${item.title}</h4>
+                        <div class="history-meta">
+                            ${date} · ${item.stats.chars}字
+                        </div>
+                    </div>
+                    <div class="history-score">
+                        <span class="score-badge ${scoreClass}">
+                            <span>${item.scores.overall}</span>
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // 绑定点击事件
+        this.elements.historyList.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = parseInt(item.dataset.id);
+                const record = history.find(h => h.id === id);
+                if (record) {
+                    this.loadRecord(record);
+                    this.switchPage('edit');
+                }
+            });
+        });
     },
     
-    showToast(message, type = '') {
-        const { toast } = this.elements;
-        toast.textContent = message;
-        toast.className = 'toast show ' + type;
-        
+    loadRecord(record) {
+        this.elements.essayInput.value = record.originalText;
+        this.elements.essayTitle.value = record.title;
+        this.elements.charCount.textContent = record.stats.chars + ' 字';
+        this.displayResult(record);
+        this.data = record;
+    },
+    
+    showToast(message) {
+        this.elements.toast.textContent = message;
+        this.elements.toast.classList.remove('hidden');
         setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2500);
+            this.elements.toast.classList.add('hidden');
+        }, 2000);
     }
 };
 
-// 批改算法模块
+// 批改算法
 const Grading = {
-    process(essay, type, focuses) {
-        try {
-            const stats = this.calculateStats(essay);
-            const errors = this.checkGrammar(essay);
-            const structureData = this.analyzeStructure(essay);
-            const scores = this.calculateScores(stats, structureData, essay, type, focuses, errors);
-            const comments = this.generateComments(scores);
-            const suggestions = this.generateSuggestions(errors, structureData, scores, type);
-            
-            return {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                originalText: essay,
-                annotatedText: this.annotateErrors(essay, errors),
-                type: type,
-                stats: stats,
-                scores: scores,
-                comments: comments,
-                suggestions: suggestions,
-                errors: errors,
-                structure: structureData
-            };
-        } catch (e) {
-            console.error('批改算法出错:', e);
-            throw new Error('批改处理失败');
-        }
+    process(text, title) {
+        const annotations = this.analyzeText(text);
+        const stats = this.calculateStats(text);
+        const scores = this.calculateScores(stats, annotations);
+        const comments = this.generateComments(scores, annotations);
+        
+        return {
+            id: Date.now(),
+            timestamp: new Date().toISOString(),
+            title: title,
+            originalText: text,
+            stats: stats,
+            scores: scores,
+            comments: comments,
+            annotations: annotations
+        };
     },
     
     calculateStats(text) {
         const chars = text.length;
-        const chineseChars = text.replace(/[^\u4e00-\u9fa5]/g, '').length;
         const sentences = text.split(/[。！？]/).filter(s => s.trim()).length;
         const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim()).length;
+        const words = text.replace(/[^\u4e00-\u9fa5]/g, '').length;
         
-        return {
-            chars,
-            chineseChars,
-            sentences,
-            paragraphs,
-            avgSentenceLength: sentences > 0 ? Math.round(chars / sentences) : 0
-        };
+        return { chars, sentences, paragraphs, words };
     },
     
-    checkGrammar(text) {
-        const errors = [];
+    analyzeText(text) {
+        const annotations = [];
+        let index = 0;
         
-        // 检查常见问题
-        const patterns = [
-            { pattern: /然后/g, type: '表达冗余', suggestion: '"然后"使用频繁，可简化连接词' },
-            { pattern: /因为所以/g, type: '句式单一', suggestion: '因果关系表达过于绝对' },
-            { pattern: /的的确确/g, type: '语义重复', suggestion: '建议简化为"的确"' },
-            { pattern: /零零散散/g, type: '语义重复', suggestion: '建议简化为"零散"' },
-            { pattern: /雪白雪白/g, type: '语义重复', suggestion: '建议简化为"雪白"' },
-            { pattern: /整整齐齐/g, type: '语义重复', suggestion: '建议简化为"整齐"' },
-            { pattern: /打扫的干干净净/g, type: '搭配不当', suggestion: '应为"打扫得干干净净"' },
-            { pattern: /听的认认真真/g, type: '搭配不当', suggestion: '应为"听得认认真真"' },
-            { pattern: /看的清清楚楚/g, type: '搭配不当', suggestion: '应为"看得清清楚楚"' },
-            { pattern: /感动的热泪盈眶/g, type: '搭配不当', suggestion: '应为"感动得热泪盈眶"' }
+        // 错别字检测
+        const errors = [
+            { wrong: '想您说', correct: '有话想对您说', type: 'error' },
+            { wrong: '的的确确', correct: '的确', type: 'error' },
+            { wrong: '零零散散', correct: '零散', type: 'error' },
+            { wrong: '雪白雪白', correct: '雪白', type: 'error' },
+            { wrong: '整整齐齐', correct: '整齐', type: 'error' },
+            { wrong: '打扫的干干净净', correct: '打扫得干干净净', type: 'error' },
+            { wrong: '感动的热泪盈眶', correct: '感动得热泪盈眶', type: 'error' }
         ];
         
-        patterns.forEach(({ pattern, type, suggestion }) => {
-            const matches = text.match(pattern);
-            if (matches) {
-                matches.forEach(match => {
-                    const pos = text.indexOf(match);
-                    errors.push({
-                        position: pos,
-                        line: text.substring(0, pos).split('\n').length,
-                        text: match,
-                        type,
-                        suggestion
-                    });
+        errors.forEach(item => {
+            let pos = text.indexOf(item.wrong);
+            while (pos !== -1) {
+                annotations.push({
+                    type: item.type,
+                    text: item.wrong,
+                    suggestion: `应改为"${item.correct}"`,
+                    start: pos,
+                    end: pos + item.wrong.length
                 });
+                pos = text.indexOf(item.wrong, pos + 1);
             }
         });
         
-        // 检查段落结尾
-        const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
-        paragraphs.forEach((para, index) => {
-            const lastLine = para.split('\n').pop().trim();
-            if (lastLine.length > 0 && index === paragraphs.length - 1) {
-                if (lastLine.length < 10) {
-                    errors.push({
-                        position: text.indexOf(lastLine),
-                        line: index + 1,
-                        text: lastLine,
-                        type: '结尾简略',
-                        suggestion: '结尾可以更充实，适当升华主题'
+        // 表达优化建议
+        const suggestions = [
+            { pattern: /然后/g, suggestion: '连接词略显重复，可适当简化', type: 'suggest' },
+            { pattern: /因为所以/g, suggestion: '因果表达过于绝对，可使用更丰富的连接词', type: 'suggest' },
+            { pattern: /非常/g, suggestion: '可替换为更具体的描写，如"十分""格外"', type: 'suggest' },
+            { pattern: /很/g, suggestion: '可替换为更生动的表达', type: 'suggest' }
+        ];
+        
+        suggestions.forEach(item => {
+            let match;
+            const regex = new RegExp(item.pattern.source, 'g');
+            while ((match = regex.exec(text)) !== null) {
+                // 避免重复标注已标注的位置
+                const pos = match.index;
+                const overlapping = annotations.some(a => a.start <= pos && a.end >= pos);
+                if (!overlapping) {
+                    annotations.push({
+                        type: item.type,
+                        text: match[0],
+                        suggestion: item.suggestion,
+                        start: pos,
+                        end: pos + match[0].length
                     });
                 }
             }
         });
         
-        return errors.slice(0, 15);
-    },
-    
-    analyzeStructure(text) {
+        // 内容建议
         const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
-        const transitionWords = ['首先', '其次', '然后', '最后', '第一', '第二', '第三', '因此', '然而', '但是'];
-        const transitionCount = (text.match(new RegExp(transitionWords.join('|'), 'g')) || []).length;
+        paragraphs.forEach((para, idx) => {
+            if (para.length < 50 && idx > 0 && idx < paragraphs.length - 1) {
+                const pos = text.indexOf(para);
+                annotations.push({
+                    type: 'content',
+                    text: `第${idx + 1}段内容较为概括`,
+                    suggestion: '可增加细节描写，丰富内容',
+                    start: pos,
+                    end: pos + Math.min(20, para.length)
+                });
+            }
+        });
         
-        return {
-            paragraphCount: paragraphs.length,
-            transitionCount,
-            hasOpening: paragraphs[0]?.length > 30,
-            hasConclusion: paragraphs[paragraphs.length - 1]?.length > 20
-        };
+        // 结尾检查
+        const lastPara = paragraphs[paragraphs.length - 1];
+        if (lastPara && lastPara.length < 30) {
+            const pos = text.indexOf(lastPara);
+            annotations.push({
+                type: 'content',
+                text: '结尾略显简单',
+                suggestion: '建议适当升华，点明主题',
+                start: pos,
+                end: pos + Math.min(20, lastPara.length)
+            });
+        }
+        
+        // 优点表扬
+        const goodExpressions = ['比喻', '拟人', '排比', '对比', '设问'];
+        goodExpressions.forEach(expr => {
+            if (text.includes(expr)) {
+                const pos = text.indexOf(expr);
+                annotations.push({
+                    type: 'praise',
+                    text: `运用了${expr}手法`,
+                    suggestion: null,
+                    start: pos,
+                    end: pos + expr.length
+                });
+            }
+        });
+        
+        // 开头检查
+        if (paragraphs[0] && paragraphs[0].length > 30) {
+            annotations.push({
+                type: 'praise',
+                text: '开头开门见山，点明主题',
+                suggestion: null,
+                start: 0,
+                end: 10
+            });
+        }
+        
+        // 结尾升华
+        if (lastPara && (lastPara.includes('明白') || lastPara.includes('懂得') || lastPara.includes('感受到'))) {
+            const pos = text.indexOf(lastPara) + lastPara.length - 20;
+            annotations.push({
+                type: 'praise',
+                text: '结尾有所升华，情感真挚',
+                suggestion: null,
+                start: Math.max(0, pos),
+                end: Math.min(text.length, pos + 20)
+            });
+        }
+        
+        return annotations.sort((a, b) => a.start - b.start);
     },
     
-    calculateScores(stats, structureData, text, type, focuses, errors) {
-        let content = 65, strScore = 65, language = 65, style = 60;
+    calculateScores(stats, annotations) {
+        let content = 75, language = 75, structure = 75, style = 70;
         
         // 内容评分
-        if (stats.chars >= 400) content += 10;
-        if (stats.chars >= 800) content += 10;
-        if (stats.paragraphs >= 3) content += 10;
-        const keywords = this.extractKeywords(text);
-        if (keywords.length >= 3) content += 5;
-        
-        // 结构评分
-        if (structureData.hasOpening) strScore += 10;
-        if (structureData.hasConclusion) strScore += 10;
-        if (structureData.transitionCount >= 2) strScore += 10;
-        if (structureData.paragraphCount >= 4) strScore += 5;
+        if (stats.chars >= 500) content += 10;
+        if (stats.chars >= 800) content += 5;
+        if (stats.paragraphs >= 4) content += 5;
+        const contentAnnotations = annotations.filter(a => a.type === 'content').length;
+        if (contentAnnotations > 0) content -= contentAnnotations * 3;
         
         // 语言评分
-        const avgLen = stats.avgSentenceLength;
-        if (avgLen >= 20 && avgLen <= 50) language += 10;
-        const rhetoric = text.match(/比喻|拟人|排比|对比|设问|夸张/g);
-        if (rhetoric?.length >= 1) language += 10;
-        if (rhetoric?.length >= 2) language += 5;
+        const errorAnnotations = annotations.filter(a => a.type === 'error').length;
+        const suggestAnnotations = annotations.filter(a => a.type === 'suggest').length;
+        language -= errorAnnotations * 5;
+        language -= suggestAnnotations * 2;
+        
+        // 结构评分
+        if (stats.paragraphs >= 3) structure += 10;
+        if (stats.paragraphs <= 6) structure += 5;
         
         // 文采评分
-        const phrases = text.match(/绚丽多彩|五彩斑斓|生机勃勃|晶莹剔透|波光粼粼|风和日丽|秋高气爽|春暖花开/g);
-        if (phrases?.length >= 1) style += 15;
-        if (phrases?.length >= 2) style += 5;
-        const quotes = text.match(/曾说|有言道|古语|诗云/g);
-        if (quotes) style += 10;
+        const praiseCount = annotations.filter(a => a.type === 'praise').length;
+        style += praiseCount * 5;
         
-        // 错误扣分
-        const errorDeduction = Math.min(errors.length * 2, 15);
+        const overall = Math.round(content * 0.3 + language * 0.3 + structure * 0.25 + style * 0.15);
         
-        // 调整权重
-        const adjust = (score, focus) => focus ? score : Math.round(score * 0.7);
-        
-        const finalScores = {
-            content: Math.min(100, Math.max(0, adjust(content, focuses.includes('content')))),
-            structure: Math.min(100, Math.max(0, adjust(strScore, focuses.includes('structure')))),
-            language: Math.min(100, Math.max(0, adjust(language, focuses.includes('language')))),
-            style: Math.min(100, Math.max(0, adjust(style, focuses.includes('style'))))
-        };
-        
-        const weights = { content: 0.30, structure: 0.25, language: 0.25, style: 0.20 };
-        let overall = 0;
-        if (focuses.includes('content')) overall += finalScores.content * weights.content;
-        if (focuses.includes('structure')) overall += finalScores.structure * weights.structure;
-        if (focuses.includes('language')) overall += finalScores.language * weights.language;
-        if (focuses.includes('style')) overall += finalScores.style * weights.style;
-        
-        overall = Math.round(overall - errorDeduction);
-        overall = Math.max(0, Math.min(100, overall));
-        
-        return { ...finalScores, overall };
-    },
-    
-    extractKeywords(text) {
-        const stopWords = ['的', '了', '是', '在', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这', '那', '我', '他', '她', '我们', '他们'];
-        const words = text.replace(/[^\u4e00-\u9fa5]/g, ' ').split(/\s+/);
-        const count = {};
-        words.forEach(w => {
-            if (w.length >= 2 && !stopWords.includes(w)) count[w] = (count[w] || 0) + 1;
-        });
-        return Object.entries(count).filter(([, c]) => c >= 2).map(([w]) => w);
-    },
-    
-    annotateErrors(text, errors) {
-        if (!errors.length) return text;
-        let result = text;
-        const sorted = [...errors].sort((a, b) => b.position - a.position);
-        sorted.forEach(err => {
-            const before = result.slice(0, err.position);
-            const after = result.slice(err.position + err.text.length);
-            result = before + `<mark class="error">${err.text}</mark>` + after;
-        });
-        return result;
-    },
-    
-    generateComments(scores) {
         return {
-            content: scores.content >= 80 ? '内容充实，主题明确' : scores.content >= 65 ? '内容较为完整' : '内容需要充实',
-            structure: scores.structure >= 80 ? '结构严谨，层次分明' : scores.structure >= 65 ? '结构较为清晰' : '结构需要优化',
-            language: scores.language >= 80 ? '语言流畅，表达准确' : scores.language >= 65 ? '语言通顺' : '语言需要提升',
-            style: scores.style >= 80 ? '文采斐然，富有感染力' : scores.style >= 65 ? '有一定文采' : '可以增强文采',
-            overall: scores.overall >= 85 ? '这是一篇优秀的作文，各方面表现都很出色！' :
-                     scores.overall >= 70 ? '这是一篇较好的作文，整体质量不错' :
-                     scores.overall >= 60 ? '这是一篇合格的作文，还有一些方面需要改进' :
-                     '这篇作文需要较大的改进'
+            content: Math.min(100, Math.max(0, Math.round(content))),
+            language: Math.min(100, Math.max(0, Math.round(language))),
+            structure: Math.min(100, Math.max(0, Math.round(structure))),
+            style: Math.min(100, Math.max(0, Math.round(style))),
+            overall: Math.min(100, Math.max(0, overall))
         };
     },
     
-    generateSuggestions(errors, structure, scores, type) {
-        const suggestions = [];
+    generateComments(scores, annotations) {
+        const errorCount = annotations.filter(a => a.type === 'error').length;
+        const suggestCount = annotations.filter(a => a.type === 'suggest').length;
+        const contentCount = annotations.filter(a => a.type === 'content').length;
+        const praiseCount = annotations.filter(a => a.type === 'praise').length;
         
-        if (errors.some(e => e.type === '搭配不当')) {
-            suggestions.push('建议检查句子成分搭配，确保主谓宾关系正确');
+        let overall = '';
+        if (scores.overall >= 85) {
+            overall = '作文整体质量优秀，内容充实，结构清晰，语言流畅，继续保持！';
+        } else if (scores.overall >= 70) {
+            overall = '作文整体质量良好，思路清晰，表述清楚，继续努力可更上一层楼！';
+        } else if (scores.overall >= 60) {
+            overall = '作文基本完成要求，但还有一些方面需要改进，建议多参考优秀范文。';
+        } else {
+            overall = '作文需要较大的修改，建议重点关注文章结构和内容完整性。';
         }
-        if (errors.some(e => e.type === '语义重复')) {
-            suggestions.push('注意词语重复问题，可用同义词替换或简化');
-        }
-        if (structure.transitionCount < 2) {
-            suggestions.push('建议增加过渡词，如"首先、其次、因此"等');
-        }
-        if (!structure.hasConclusion) {
-            suggestions.push('结尾需要进行适当升华，点明主题');
-        }
-        if (scores.content < 70) {
-            suggestions.push('内容充实度需要加强，可增加具体事例支撑');
-        }
-        if (scores.language < 70) {
-            suggestions.push('语言表达需要提升，注意句式变化');
-        }
-        if (scores.style < 70) {
-            suggestions.push('可以尝试运用修辞手法增强文采');
-        }
-        suggestions.push('建议完成后通读全文，检查错别字和语病');
         
-        return suggestions.slice(0, 6);
+        const positive = praiseCount > 0 
+            ? `本文有${praiseCount}处亮点表达，如恰当运用修辞手法、开头结尾点题等。`
+            : '文章结构完整，叙事基本清晰。';
+        
+        const suggestionsSummary = [];
+        if (errorCount > 0) suggestionsSummary.push(`发现${errorCount}处语法错误需修正`);
+        if (suggestCount > 0) suggestionsSummary.push(`${suggestCount}处表达可优化`);
+        if (contentCount > 0) suggestionsSummary.push(`${contentCount}处内容可丰富细节`);
+        
+        return {
+            overall,
+            positive,
+            suggestionsSummary: suggestionsSummary.join('，') || '整体表达良好，可进一步丰富内容。'
+        };
     }
 };
