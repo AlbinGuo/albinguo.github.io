@@ -1379,6 +1379,16 @@ const App = {
         this.saveSideComments();
     },
     
+    // 从模板或自定义评语添加旁批
+    addSideCommentFromTemplate(comment) {
+        if (!comment || comment.trim() === '') return;
+        
+        const firstCell = document.querySelector('.char-cell:not(.empty)');
+        const charIndex = firstCell ? parseInt(firstCell.dataset.index) : 0;
+        
+        this.addSideComment(1, comment.trim(), charIndex);
+    },
+    
     addAnnotationMarker(annotation) {
         // 找到起始格子
         const startCell = this.getCellAtIndex(annotation.startIndex);
