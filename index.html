@@ -415,6 +415,23 @@
                 <div class="selected-range-display" id="selectedRangeDisplay">
                     已选中：第 <span id="selectedStart">0</span> - <span id="selectedEnd">0</span> 字
                 </div>
+                <div class="color-selector">
+                    <span class="color-label">评语类型：</span>
+                    <div class="color-options">
+                        <label class="color-option">
+                            <input type="radio" name="commentColor" value="red" checked>
+                            <span class="color-badge red">✏ 纠错</span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="commentColor" value="yellow">
+                            <span class="color-badge yellow">💡 建议</span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="commentColor" value="green">
+                            <span class="color-badge green">👍 表扬</span>
+                        </label>
+                    </div>
+                </div>
                 <textarea id="commentInput" placeholder="输入批注内容..." rows="4"></textarea>
             </div>
             <div class="modal-footer">

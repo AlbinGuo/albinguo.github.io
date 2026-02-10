@@ -1332,6 +1332,8 @@ const App = {
     closeCommentModal() {
         this.elements.commentModal.classList.add('hidden');
         this.pendingTemplateComment = null;
+        const redRadio = document.querySelector('input[name="commentColor"][value="red"]');
+        if (redRadio) redRadio.checked = true;
     },
     
     confirmAddComment() {
@@ -1341,16 +1343,17 @@ const App = {
             return;
         }
         
+        const color = document.querySelector('input[name="commentColor"]:checked').value;
         const startCell = this.getCellAtIndex(this.selectedRange.start);
         const lineNum = startCell ? parseInt(startCell.closest('.char-row').dataset.line) : 1;
         
-        this.addSideComment(lineNum, comment, this.selectedRange.start);
+        this.addSideComment(lineNum, comment, this.selectedRange.start, color);
         this.showToast(`已添加批改 #${this.annotationCount}`);
         this.closeCommentModal();
     },
     
     // 旁批功能
-    addSideComment(lineNum, comment, charIndex = null) {
+    addSideComment(lineNum, comment, charIndex = null, color = 'red') {
         this.annotationCount++;
         const id = Date.now();
         
@@ -1359,6 +1362,7 @@ const App = {
             number: this.annotationCount,
             lineNum,
             comment,
+            color,
             charIndex: charIndex !== null ? charIndex : this.selectedRange?.start,
             startIndex: this.selectedRange?.start,
             endIndex: this.selectedRange?.end,
@@ -1399,7 +1403,7 @@ const App = {
             
             // 添加新标注
             const marker = document.createElement('div');
-            marker.className = 'annotation-marker';
+            marker.className = `annotation-marker ${annotation.color || 'red'}`;
             marker.textContent = annotation.number;
             marker.dataset.annotationId = annotation.id;
             startCell.appendChild(marker);
@@ -1414,6 +1418,9 @@ const App = {
                 const cell = this.getCellAtIndex(i);
                 if (cell) {
                     cell.classList.add('has-annotation');
+                    if (annotation.color) {
+                        cell.classList.add(`highlight-${annotation.color}`);
+                    }
                 }
             }
         }
@@ -1437,10 +1444,17 @@ const App = {
             return;
         }
         
+        const colorLabels = {
+            red: '纠错',
+            yellow: '建议',
+            green: '表扬'
+        };
+        
         this.elements.sideCommentBody.innerHTML = this.sideComments.map(item => `
-            <div class="side-comment-item" data-id="${item.id}">
-                <div class="line-ref">
-                    <span class="comment-number">${item.number}</span>
+            <div class="side-comment-item ${item.color || 'red'}" data-id="${item.id}">
+                <div class="comment-header">
+                    <span class="comment-number ${item.color || 'red'}">${item.number}</span>
+                    <span class="comment-color-label ${item.color || 'red'}">${colorLabels[item.color] || '纠错'}</span>
                     ${item.startIndex !== null && item.endIndex !== null && item.startIndex !== item.endIndex
                         ? `第 ${item.startIndex + 1}-${item.endIndex + 1} 字`
                         : item.startIndex !== null 
