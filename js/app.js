@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const App = {
     data: null,
+    textGrid: [],
     
     init() {
         this.cacheElements();
@@ -22,6 +23,8 @@ const App = {
             
             // 作文输入
             essayInput: document.getElementById('essayInput'),
+            textGrid: document.getElementById('textGrid'),
+            textGridContainer: document.getElementById('textGridContainer'),
             essayTitle: document.getElementById('essayTitle'),
             charCount: document.getElementById('charCount'),
             gradeBtn: document.getElementById('gradeBtn'),
@@ -34,9 +37,6 @@ const App = {
             overallComment: document.getElementById('overallComment'),
             summaryList: document.getElementById('summaryList'),
             detailList: document.getElementById('detailList'),
-            
-            // 筛选标签
-            filterTabs: document.querySelectorAll('.filter-tab'),
             
             // 历史
             historyList: document.getElementById('historyList'),
@@ -56,18 +56,9 @@ const App = {
             });
         });
         
-        // 字数统计
-        this.elements.essayInput.addEventListener('input', () => {
-            const count = this.elements.essayInput.value.length;
-            this.elements.charCount.textContent = count + ' 字';
-        });
-        
         // 清空
         this.elements.clearBtn.addEventListener('click', () => {
-            this.elements.essayInput.value = '';
-            this.elements.essayTitle.value = '';
-            this.elements.charCount.textContent = '0 字';
-            this.resetGradingPanel();
+            this.clearTextGrid();
         });
         
         // 开始批改
@@ -106,26 +97,155 @@ const App = {
         }
     },
     
+    // 文字格相关方法
+    initTextGrid() {
+        const container = this.elements.textGrid;
+        container.innerHTML = `
+            <div class="grid-placeholder">
+                <p>在此输入作文内容</p>
+                <p>支持直接粘贴大段文本，自动拆分为文字格</p>
+            </div>
+        `;
+        this.textGrid = [];
+    },
+    
+    // 粘贴处理：将粘贴的文本转换为文字格
+    handlePaste(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (text) {
+            this.insertText(text);
+        }
+    },
+    
+    insertText(text) {
+        const container = this.elements.textGrid;
+        
+        // 移除占位符
+        const placeholder = container.querySelector('.grid-placeholder');
+        if (placeholder) placeholder.remove();
+        
+        // 获取当前文本内容
+        let currentText = this.getTextFromGrid();
+        
+        // 在光标位置插入文本（简化处理：追加到末尾）
+        currentText += text;
+        
+        // 重新渲染文字格
+        this.renderTextGrid(currentText);
+        
+        // 更新字数统计
+        this.elements.charCount.textContent = currentText.length + ' 字';
+    },
+    
+    renderTextGrid(text) {
+        const container = this.elements.textGrid;
+        container.innerHTML = '';
+        
+        // 存储字符位置映射
+        this.charPositions = [];
+        
+        const lines = text.split('\n');
+        let globalIndex = 0;
+        
+        lines.forEach((line, lineIndex) => {
+            // 段落标记
+            if (lineIndex > 0) {
+                const marker = document.createElement('div');
+                marker.className = 'paragraph-marker';
+                marker.dataset.para = `第${this.toChinese(lineIndex + 1)}段`;
+                container.appendChild(marker);
+            }
+            
+            // 字符网格
+            const grid = document.createElement('div');
+            grid.className = 'char-grid';
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = char;
+                cell.dataset.index = globalIndex;
+                cell.dataset.char = char;
+                
+                // 点击跳转到批改详情
+                cell.addEventListener('click', () => this.onCellClick(globalIndex));
+                
+                grid.appendChild(cell);
+                this.charPositions[globalIndex] = cell;
+                globalIndex++;
+            }
+            
+            container.appendChild(grid);
+        });
+        
+        this.textGrid = text.split('');
+        this.elements.charCount.textContent = text.length + ' 字';
+    },
+    
+    getTextFromGrid() {
+        return this.textGrid.join('') || '';
+    },
+    
+    clearTextGrid() {
+        this.elements.essayTitle.value = '';
+        this.elements.charCount.textContent = '0 字';
+        this.initTextGrid();
+        this.textGrid = [];
+        this.resetGradingPanel();
+    },
+    
+    onCellClick(index) {
+        // 如果有批改数据，高亮对应批注
+        if (this.data && this.data.annotations) {
+            const annotation = this.data.annotations.find(a => 
+                index >= a.charIndex && index < a.charIndex + a.text.length
+            );
+            if (annotation) {
+                // 滚动并高亮右侧批改项
+                const detailItems = this.elements.detailList.querySelectorAll('.detail-item');
+                detailItems.forEach((item, idx) => {
+                    const itemAnnotation = this.data.annotations[idx];
+                    if (itemAnnotation === annotation) {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        item.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.5)';
+                        setTimeout(() => {
+                            item.style.boxShadow = '';
+                        }, 2000);
+                    }
+                });
+            }
+        }
+    },
+    
+    // 批改处理
     startGrading() {
-        const content = this.elements.essayInput.value.trim();
+        const text = this.getTextFromGrid();
         const title = this.elements.essayTitle.value.trim() || '未命名';
         
-        if (!content) {
+        if (!text) {
             this.showToast('请输入作文内容');
             return;
         }
         
-        if (content.length < 50) {
+        if (text.length < 50) {
             this.showToast('作文内容太短，请输入更多内容');
             return;
         }
         
+        // 先清除之前的高亮
+        this.clearHighlights();
+        
         // 执行批改
-        const result = Grading.process(content, title);
+        const result = Grading.process(text, title);
         this.data = result;
         
         // 显示结果
         this.displayResult(result);
+        
+        // 在文字格中标注批改结果
+        this.highlightAnnotations(result.annotations);
         
         // 保存到历史
         this.saveToHistory(result);
@@ -175,7 +295,7 @@ const App = {
         this.currentAnnotations = annotations;
         
         this.elements.detailList.innerHTML = annotations.map((item, index) => `
-            <div class="detail-item ${item.type}" data-index="${index}" data-type="${item.type}">
+            <div class="detail-item ${item.type}" data-index="${index}" data-type="${item.type}" data-char-index="${item.charIndex}">
                 <div class="detail-content">
                     <span class="detail-number">${index + 1}</span>
                     <span class="tag ${item.type}">${this.getTypeLabel(item.type)}</span>
@@ -188,10 +308,44 @@ const App = {
         // 绑定点击事件
         this.elements.detailList.querySelectorAll('.detail-item').forEach(item => {
             item.addEventListener('click', () => {
-                const index = parseInt(item.dataset.index);
-                this.highlightAnnotation(index);
+                const charIndex = parseInt(item.dataset.charIndex);
+                this.scrollToChar(charIndex);
             });
         });
+    },
+    
+    highlightAnnotations(annotations) {
+        // 清除之前的高亮
+        document.querySelectorAll('.char-cell').forEach(cell => {
+            cell.classList.remove('error', 'suggest', 'content', 'praise', 'highlighted');
+        });
+        
+        // 添加新的高亮
+        annotations.forEach((item, idx) => {
+            for (let i = item.charIndex; i < item.charIndex + item.text.length; i++) {
+                const cell = this.charPositions[i];
+                if (cell) {
+                    cell.classList.add(item.type);
+                }
+            }
+        });
+    },
+    
+    clearHighlights() {
+        document.querySelectorAll('.char-cell').forEach(cell => {
+            cell.classList.remove('error', 'suggest', 'content', 'praise', 'highlighted');
+        });
+    },
+    
+    scrollToChar(charIndex) {
+        const cell = this.charPositions[charIndex];
+        if (cell) {
+            cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cell.classList.add('highlighted');
+            setTimeout(() => {
+                cell.classList.remove('highlighted');
+            }, 2000);
+        }
     },
     
     getTypeLabel(type) {
@@ -218,28 +372,6 @@ const App = {
         });
     },
     
-    highlightAnnotation(index) {
-        const annotation = this.currentAnnotations[index];
-        if (!annotation) return;
-        
-        // 在输入框中滚动到对应位置
-        const textarea = this.elements.essayInput;
-        const startPos = annotation.start;
-        const endPos = annotation.end;
-        
-        textarea.focus();
-        textarea.setSelectionRange(startPos, endPos);
-        
-        // 滚动到视野
-        const lineHeight = 24;
-        const lines = textarea.value.substring(0, startPos).split('\n').length;
-        textarea.scrollTop = (lines - 1) * lineHeight - 100;
-        
-        // 临时高亮
-        textarea.blur();
-        setTimeout(() => textarea.focus(), 100);
-    },
-    
     resetGradingPanel() {
         this.elements.essayTitleDisplay.innerHTML = `
             <span class="label">作文标题：</span>
@@ -256,6 +388,7 @@ const App = {
         `;
         this.elements.detailList.innerHTML = '<div class="empty-state"><p>提交作文后显示详细批改</p></div>';
         this.data = null;
+        this.clearHighlights();
     },
     
     saveToHistory(result) {
@@ -308,10 +441,11 @@ const App = {
     },
     
     loadRecord(record) {
-        this.elements.essayInput.value = record.originalText;
+        this.renderTextGrid(record.originalText);
         this.elements.essayTitle.value = record.title;
         this.elements.charCount.textContent = record.stats.chars + ' 字';
         this.displayResult(record);
+        this.highlightAnnotations(record.annotations);
         this.data = record;
     },
     
@@ -321,6 +455,13 @@ const App = {
         setTimeout(() => {
             this.elements.toast.classList.add('hidden');
         }, 2000);
+    },
+    
+    toChinese(num) {
+        const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+        if (num <= 10) return chars[num];
+        if (num < 20) return '十' + (chars[num % 10] || '');
+        return num;
     }
 };
 
@@ -346,26 +487,27 @@ const Grading = {
     
     calculateStats(text) {
         const chars = text.length;
-        const sentences = text.split(/[。！？]/).filter(s => s.trim()).length;
-        const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim()).length;
-        const words = text.replace(/[^\u4e00-\u9fa5]/g, '').length;
+        const sentences = text.split(/[。！？?!]/).filter(s => s.trim()).length;
+        const paragraphs = text.split(/\n/).filter(p => p.trim()).length;
         
-        return { chars, sentences, paragraphs, words };
+        return { chars, sentences, paragraphs };
     },
     
     analyzeText(text) {
         const annotations = [];
-        let index = 0;
+        let globalIndex = 0;
         
         // 错别字检测
         const errors = [
-            { wrong: '想您说', correct: '有话想对您说', type: 'error' },
             { wrong: '的的确确', correct: '的确', type: 'error' },
             { wrong: '零零散散', correct: '零散', type: 'error' },
             { wrong: '雪白雪白', correct: '雪白', type: 'error' },
             { wrong: '整整齐齐', correct: '整齐', type: 'error' },
             { wrong: '打扫的干干净净', correct: '打扫得干干净净', type: 'error' },
-            { wrong: '感动的热泪盈眶', correct: '感动得热泪盈眶', type: 'error' }
+            { wrong: '感动的热泪盈眶', correct: '感动得热泪盈眶', type: 'error' },
+            { wrong: '想您说', correct: '有话想对您说', type: 'error' },
+            { wrong: '我觉的', correct: '我觉得', type: 'error' },
+            { wrong: '他她它', correct: '注意区分人称', type: 'error' }
         ];
         
         errors.forEach(item => {
@@ -375,8 +517,8 @@ const Grading = {
                     type: item.type,
                     text: item.wrong,
                     suggestion: `应改为"${item.correct}"`,
-                    start: pos,
-                    end: pos + item.wrong.length
+                    charIndex: pos,
+                    suggestion: `建议改为"${item.correct}"`
                 });
                 pos = text.indexOf(item.wrong, pos + 1);
             }
@@ -384,98 +526,83 @@ const Grading = {
         
         // 表达优化建议
         const suggestions = [
-            { pattern: /然后/g, suggestion: '连接词略显重复，可适当简化', type: 'suggest' },
-            { pattern: /因为所以/g, suggestion: '因果表达过于绝对，可使用更丰富的连接词', type: 'suggest' },
-            { pattern: /非常/g, suggestion: '可替换为更具体的描写，如"十分""格外"', type: 'suggest' },
-            { pattern: /很/g, suggestion: '可替换为更生动的表达', type: 'suggest' }
+            { pattern: /然后/g, suggestion: '连接词略显重复', type: 'suggest' },
+            { pattern: /因为所以/g, suggestion: '因果表达过于绝对', type: 'suggest' },
+            { pattern: /非常/g, suggestion: '可替换为更具体的描写', type: 'suggest' },
+            { pattern: /很/g, suggestion: '可替换为更生动的表达', type: 'suggest' },
+            { pattern: /说/g, suggestion: '注意"说"的替换词', type: 'suggest' }
         ];
         
         suggestions.forEach(item => {
             let match;
             const regex = new RegExp(item.pattern.source, 'g');
             while ((match = regex.exec(text)) !== null) {
-                // 避免重复标注已标注的位置
                 const pos = match.index;
-                const overlapping = annotations.some(a => a.start <= pos && a.end >= pos);
+                const overlapping = annotations.some(a => a.charIndex <= pos && a.charIndex + a.text.length > pos);
                 if (!overlapping) {
                     annotations.push({
                         type: item.type,
                         text: match[0],
                         suggestion: item.suggestion,
-                        start: pos,
-                        end: pos + match[0].length
+                        charIndex: pos
                     });
                 }
             }
         });
         
-        // 内容建议
-        const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+        // 内容建议 - 检查段落
+        const paragraphs = text.split(/\n/).filter(p => p.trim());
         paragraphs.forEach((para, idx) => {
-            if (para.length < 50 && idx > 0 && idx < paragraphs.length - 1) {
+            if (para.length < 30 && idx > 0 && idx < paragraphs.length - 1) {
                 const pos = text.indexOf(para);
                 annotations.push({
                     type: 'content',
-                    text: `第${idx + 1}段内容较为概括`,
-                    suggestion: '可增加细节描写，丰富内容',
-                    start: pos,
-                    end: pos + Math.min(20, para.length)
+                    text: `第${this.toChinese(idx + 1)}段内容较为概括`,
+                    suggestion: '可增加细节描写',
+                    charIndex: pos
                 });
             }
         });
         
         // 结尾检查
         const lastPara = paragraphs[paragraphs.length - 1];
-        if (lastPara && lastPara.length < 30) {
+        if (lastPara && lastPara.length < 20) {
             const pos = text.indexOf(lastPara);
             annotations.push({
                 type: 'content',
                 text: '结尾略显简单',
-                suggestion: '建议适当升华，点明主题',
-                start: pos,
-                end: pos + Math.min(20, lastPara.length)
+                suggestion: '建议适当升华',
+                charIndex: pos
             });
         }
         
         // 优点表扬
-        const goodExpressions = ['比喻', '拟人', '排比', '对比', '设问'];
+        const goodExpressions = ['比喻', '拟人', '排比', '对比', '设问', '感叹'];
         goodExpressions.forEach(expr => {
-            if (text.includes(expr)) {
-                const pos = text.indexOf(expr);
+            let pos = text.indexOf(expr);
+            while (pos !== -1) {
                 annotations.push({
                     type: 'praise',
                     text: `运用了${expr}手法`,
                     suggestion: null,
-                    start: pos,
-                    end: pos + expr.length
+                    charIndex: pos
                 });
+                pos = text.indexOf(expr, pos + 1);
             }
         });
         
         // 开头检查
-        if (paragraphs[0] && paragraphs[0].length > 30) {
+        if (paragraphs[0] && paragraphs[0].length > 20) {
             annotations.push({
                 type: 'praise',
-                text: '开头开门见山，点明主题',
+                text: '开头开门见山',
                 suggestion: null,
-                start: 0,
-                end: 10
+                charIndex: 0
             });
         }
         
-        // 结尾升华
-        if (lastPara && (lastPara.includes('明白') || lastPara.includes('懂得') || lastPara.includes('感受到'))) {
-            const pos = text.indexOf(lastPara) + lastPara.length - 20;
-            annotations.push({
-                type: 'praise',
-                text: '结尾有所升华，情感真挚',
-                suggestion: null,
-                start: Math.max(0, pos),
-                end: Math.min(text.length, pos + 20)
-            });
-        }
-        
-        return annotations.sort((a, b) => a.start - b.start);
+        // 按位置排序
+        return annotations.sort((a, b) => a.charIndex - b.charIndex);
     },
     
     calculateScores(stats, annotations) {
@@ -485,8 +612,8 @@ const Grading = {
         if (stats.chars >= 500) content += 10;
         if (stats.chars >= 800) content += 5;
         if (stats.paragraphs >= 4) content += 5;
-        const contentAnnotations = annotations.filter(a => a.type === 'content').length;
-        if (contentAnnotations > 0) content -= contentAnnotations * 3;
+        const contentIssues = annotations.filter(a => a.type === 'content').length;
+        if (contentIssues > 0) content -= contentIssues * 3;
         
         // 语言评分
         const errorAnnotations = annotations.filter(a => a.type === 'error').length;
@@ -496,7 +623,7 @@ const Grading = {
         
         // 结构评分
         if (stats.paragraphs >= 3) structure += 10;
-        if (stats.paragraphs <= 6) structure += 5;
+        if (stats.paragraphs <= 8) structure += 5;
         
         // 文采评分
         const praiseCount = annotations.filter(a => a.type === 'praise').length;
@@ -544,5 +671,15 @@ const Grading = {
             positive,
             suggestionsSummary: suggestionsSummary.join('，') || '整体表达良好，可进一步丰富内容。'
         };
+    },
+    
+    toChinese(num) {
+        const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+        if (num <= 10) return chars[num];
+        if (num < 20) return '十' + (chars[num % 10] || '');
+        return num;
     }
 };
+
+// 初始化文字格容器
+App.initTextGrid();

@@ -165,26 +165,138 @@ body {
     color: var(--gray-500);
 }
 
+/* Text Grid Container */
 .panel-body {
     flex: 1;
     padding: 1rem;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.panel-body textarea {
-    width: 100%;
+.text-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border: 2px dashed var(--gray-300);
+}
+
+.text-grid {
+    padding: 1rem;
+    min-height: 100%;
+    display: none;
+}
+
+.text-grid.active {
+    display: block;
+}
+
+.grid-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     height: 100%;
-    border: none;
-    resize: none;
-    font-size: 0.95rem;
-    line-height: 1.8;
-    font-family: inherit;
+    min-height: 300px;
+    color: var(--gray-400);
+    text-align: center;
 }
 
-.panel-body textarea:focus {
+.grid-placeholder p {
+    margin: 0.25rem 0;
+}
+
+/* Character Grid */
+.char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+    gap: 2px;
+}
+
+.char-cell {
+    width: 28px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--gray-800);
+    cursor: text;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.char-cell:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.char-cell:focus-within {
     outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+.char-cell.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+}
+
+.char-cell.suggest {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary);
+}
+
+.char-cell.content {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--purple);
+}
+
+.char-cell.praise {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--success);
+}
+
+.char-cell.highlighted {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5);
+    transform: scale(1.1);
+}
+
+.char-cell .line-num {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--gray-400);
+    background: var(--gray-100);
+    padding: 0 3px;
+}
+
+/* Paragraph line numbers */
+.paragraph-marker {
+    grid-column: 1 / -1;
+    height: 20px;
+    border-bottom: 2px solid var(--gray-300);
+    margin: 8px 0;
+    position: relative;
+}
+
+.paragraph-marker::after {
+    content: attr(data-para);
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+    font-size: 10px;
+    color: var(--gray-400);
+}
+
+/* Panel Footer */
 .panel-footer {
     display: flex;
     justify-content: flex-end;
@@ -832,25 +944,10 @@ body {
     .title-input {
         width: 120px;
     }
-}
-
-/* Highlighting in textarea */
-.annotation-highlight {
-    background: rgba(239, 68, 68, 0.2);
-    border-bottom: 2px solid var(--danger);
-    cursor: pointer;
-}
-
-.annotation-highlight:hover {
-    background: rgba(239, 68, 68, 0.3);
-}
-
-.annotation-suggest {
-    background: rgba(37, 99, 235, 0.2);
-    border-bottom: 2px solid var(--primary);
-    cursor: pointer;
-}
-
-.annotation-suggest:hover {
-    background: rgba(37, 99, 235, 0.3);
+    
+    .char-cell {
+        width: 24px;
+        height: 28px;
+        font-size: 12px;
+    }
 }

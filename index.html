@@ -38,7 +38,15 @@
                             </div>
                         </div>
                         <div class="panel-body">
-                            <textarea id="essayInput" placeholder="在此粘贴或输入您的作文内容..."></textarea>
+                            <!-- 文字格容器 -->
+                            <div class="text-grid-container" id="textGridContainer">
+                                <div class="text-grid" id="textGrid">
+                                    <div class="grid-placeholder">
+                                        <p>在此输入作文内容</p>
+                                        <p>每个格子一个字，支持粘贴大段文本</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="panel-footer">
                             <button class="btn-secondary" id="clearBtn">清空</button>
@@ -141,11 +149,11 @@
                         <div class="help-section">
                             <h3>使用步骤</h3>
                             <ol>
-                                <li>在左侧输入作文标题和内容</li>
+                                <li>在左侧输入作文标题</li>
+                                <li>在文字格中输入或粘贴作文内容（每个格子一个字）</li>
                                 <li>点击"开始批改"按钮</li>
                                 <li>查看右侧的综合评价和详细批改</li>
                                 <li>可点击批改项查看原文对应位置</li>
-                                <li>可一键采纳修改建议</li>
                             </ol>
                         </div>
                         <div class="help-section">
@@ -163,7 +171,7 @@
         </main>
     </div>
 
-    <!-- 批改设置弹窗 -->
+    <!-- 设置弹窗 -->
     <div class="modal-overlay hidden" id="settingsModal">
         <div class="modal">
             <div class="modal-header">
