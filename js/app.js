@@ -1356,6 +1356,8 @@ const App = {
     addSideComment(lineNum, comment, charIndex = null, color = 'red') {
         this.annotationCount++;
         const id = Date.now();
+        const startIdx = charIndex !== null ? charIndex : (this.selectedRange?.start || 0);
+        const endIdx = this.selectedRange?.end !== undefined ? this.selectedRange?.end : startIdx;
         
         const annotation = {
             id,
@@ -1363,9 +1365,9 @@ const App = {
             lineNum,
             comment,
             color,
-            charIndex: charIndex !== null ? charIndex : this.selectedRange?.start,
-            startIndex: this.selectedRange?.start,
-            endIndex: this.selectedRange?.end,
+            charIndex: startIdx,
+            startIndex: startIdx,
+            endIndex: endIdx,
             timestamp: new Date().toISOString()
         };
         
@@ -1384,13 +1386,13 @@ const App = {
     },
     
     // 从模板或自定义评语添加旁批
-    addSideCommentFromTemplate(comment) {
+    addSideCommentFromTemplate(comment, color = 'red') {
         if (!comment || comment.trim() === '') return;
         
         const firstCell = document.querySelector('.char-cell:not(.empty)');
         const charIndex = firstCell ? parseInt(firstCell.dataset.index) : 0;
         
-        this.addSideComment(1, comment.trim(), charIndex);
+        this.addSideComment(1, comment.trim(), charIndex, color);
     },
     
     addAnnotationMarker(annotation) {
