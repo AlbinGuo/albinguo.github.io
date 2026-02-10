@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史记录 - 智能作文批改助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/history.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">✏</span>
+                <span class="logo-text">智能作文批改</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">批改</a>
+                <a href="history.html" class="nav-link active">历史记录</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <!-- 统计卡片 -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="totalCount">0</span>
+                        <span class="stat-label">总批改</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="avgScore">0</span>
+                        <span class="stat-label">平均分</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📏</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="avgChars">0</span>
+                        <span class="stat-label">平均字数</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="highScore">0</span>
+                        <span class="stat-label">最高分</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 筛选和列表 -->
+            <div class="content-area">
+                <div class="list-header">
+                    <h2>批改记录</h2>
+                    <div class="list-actions">
+                        <select id="typeFilter">
+                            <option value="all">全部类型</option>
+                            <option value="narrative">记叙文</option>
+                            <option value="argumentative">议论文</option>
+                            <option value="expository">说明文</option>
+                        </select>
+                        <select id="scoreFilter">
+                            <option value="all">全部分数</option>
+                            <option value="high">85分以上</option>
+                            <option value="medium">60-85分</option>
+                            <option value="low">60分以下</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <h3>暂无历史记录</h3>
+                        <p>开始您的第一次批改吧</p>
+                        <a href="index.html" class="btn-primary" style="display: inline-block; margin-top: 1rem;">去批改</a>
+                        <button onclick="HistoryPage.addSampleData()" class="btn-secondary" style="display: inline-block; margin-top: 1rem;">示例数据</button>
+                    </div>
+                </div>
+
+                <div class="pagination" id="pagination" hidden>
+                    <button class="page-btn" id="prevPage">上一页</button>
+                    <span class="page-info" id="pageInfo">1 / 1</span>
+                    <button class="page-btn" id="nextPage">下一页</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 智能作文批改助手</p>
+        </footer>
+    </div>
+
+    <!-- 详情模态框 -->
+    <div class="modal-overlay" id="detailModal" hidden>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>批改详情</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/history.js"></script>
+</body>
+</html>

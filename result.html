@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批改结果 - 智能作文批改助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/result.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">✏</span>
+                <span class="logo-text">智能作文批改</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">批改</a>
+                <a href="history.html" class="nav-link">历史记录</a>
+            </nav>
+        </header>
+
+        <main class="main result-main">
+            <!-- 左侧：结果展示 -->
+            <section class="result-section">
+                <!-- 总分卡片 -->
+                <div class="score-card">
+                    <div class="score-circle" id="scoreCircle">
+                        <span class="score-value" id="scoreValue">0</span>
+                        <span class="score-unit">分</span>
+                    </div>
+                    <div class="score-info">
+                        <h2 id="scoreLevel">优秀</h2>
+                        <p id="overallComment">这是一篇优秀的作文</p>
+                    </div>
+                    <div class="score-stats">
+                        <div class="stat">
+                            <span class="stat-value" id="charCount">0</span>
+                            <span class="stat-label">字数</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="paraCount">0</span>
+                            <span class="stat-label">段落</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="errorCount">0</span>
+                            <span class="stat-label">问题</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分项评分 -->
+                <div class="card">
+                    <h3>分项评分</h3>
+                    <div class="score-bars">
+                        <div class="score-bar-item">
+                            <div class="bar-label">
+                                <span>内容</span>
+                                <span class="bar-value" id="contentScore">0</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="contentBar" style="--width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-bar-item">
+                            <div class="bar-label">
+                                <span>结构</span>
+                                <span class="bar-value" id="structureScore">0</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="structureBar" style="--width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-bar-item">
+                            <div class="bar-label">
+                                <span>语言</span>
+                                <span class="bar-value" id="languageScore">0</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="languageBar" style="--width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-bar-item">
+                            <div class="bar-label">
+                                <span>文采</span>
+                                <span class="bar-value" id="styleScore">0</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="styleBar" style="--width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 作文原文 -->
+                <div class="card">
+                    <h3>原文</h3>
+                    <div class="essay-content" id="essayContent">
+                        <p class="placeholder">暂无内容</p>
+                    </div>
+                </div>
+
+                <!-- 修改建议 -->
+                <div class="card">
+                    <h3>修改建议</h3>
+                    <ul class="suggestions-list" id="suggestionsList">
+                        <li class="placeholder">暂无建议</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 右侧：操作区 -->
+            <aside class="aside-section">
+                <div class="card">
+                    <h3>操作</h3>
+                    <div class="action-buttons">
+                        <button class="btn-primary" id="newGradingBtn">
+                            <span>📝</span>
+                            新建批改
+                        </button>
+                        <button class="btn-secondary" id="downloadBtn">
+                            <span>📥</span>
+                            下载结果
+                        </button>
+                        <button class="btn-secondary" id="saveBtn">
+                            <span>⭐</span>
+                            保存记录
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 错误详情 -->
+                <div class="card" id="errorCard" hidden>
+                    <h3>问题详情</h3>
+                    <ul class="error-list" id="errorList"></ul>
+                </div>
+
+                <!-- 评语 -->
+                <div class="card">
+                    <h3>评语</h3>
+                    <div class="comments-box" id="commentsBox">
+                        <p class="placeholder">暂无评语</p>
+                    </div>
+                </div>
+
+                <div class="card notice">
+                    <p><strong>声明：</strong>本结果仅供参考，建议结合教师专业意见使用。</p>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 智能作文批改助手</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/result.js"></script>
+</body>
+</html>
