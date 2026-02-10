@@ -162,10 +162,12 @@ const App = {
             this.openCommentModal();
         });
         
-        // 评语模板按钮点击
+        // 评语模板按钮点击 - 打开弹窗让用户选择颜色
         document.querySelectorAll('.template-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                this.addSideCommentFromTemplate(btn.dataset.comment);
+                this.pendingTemplateComment = btn.dataset.comment;
+                this.elements.commentInput.value = btn.dataset.comment;
+                this.openCommentModal();
             });
         });
         
@@ -204,22 +206,32 @@ const App = {
             }
         });
         
-        // 自定义评语添加
+        // 自定义评语添加 - 打开弹窗选择颜色
         this.elements.addCustomComment.addEventListener('click', () => {
             const comment = this.elements.customComment.value.trim();
             if (comment) {
-                this.addSideCommentFromTemplate(comment);
+                this.pendingTemplateComment = comment;
+                this.elements.commentInput.value = comment;
+                this.openCommentModal();
                 this.elements.customComment.value = '';
             } else {
                 this.showToast('请输入评语');
             }
         });
         
-        // 自定义评语回车提交
+        // 自定义评语回车提交 - 打开弹窗选择颜色
         this.elements.customComment.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                this.elements.addCustomComment.click();
+                const comment = this.elements.customComment.value.trim();
+                if (comment) {
+                    this.pendingTemplateComment = comment;
+                    this.elements.commentInput.value = comment;
+                    this.openCommentModal();
+                    this.elements.customComment.value = '';
+                } else {
+                    this.showToast('请输入评语');
+                }
             }
         });
         
@@ -1344,10 +1356,27 @@ const App = {
         }
         
         const color = document.querySelector('input[name="commentColor"]:checked').value;
-        const startCell = this.getCellAtIndex(this.selectedRange.start);
-        const lineNum = startCell ? parseInt(startCell.closest('.char-row').dataset.line) : 1;
         
-        this.addSideComment(lineNum, comment, this.selectedRange.start, color);
+        let startIndex = this.selectedRange?.start;
+        let lineNum = 1;
+        
+        if (startIndex === null) {
+            // 模板评语没有选中文字，使用第一个非空格子
+            const firstCell = document.querySelector('.char-cell:not(.empty)');
+            if (firstCell) {
+                startIndex = parseInt(firstCell.dataset.index);
+                lineNum = parseInt(firstCell.closest('.char-row').dataset.line) || 1;
+            } else {
+                startIndex = 0;
+            }
+        } else {
+            const startCell = this.getCellAtIndex(startIndex);
+            if (startCell) {
+                lineNum = parseInt(startCell.closest('.char-row').dataset.line) || 1;
+            }
+        }
+        
+        this.addSideComment(lineNum, comment, startIndex, color);
         this.showToast(`已添加批改 #${this.annotationCount}`);
         this.closeCommentModal();
     },
@@ -1383,16 +1412,6 @@ const App = {
         
         this.renderSideComments();
         this.saveSideComments();
-    },
-    
-    // 从模板或自定义评语添加旁批
-    addSideCommentFromTemplate(comment, color = 'red') {
-        if (!comment || comment.trim() === '') return;
-        
-        const firstCell = document.querySelector('.char-cell:not(.empty)');
-        const charIndex = firstCell ? parseInt(firstCell.dataset.index) : 0;
-        
-        this.addSideComment(1, comment.trim(), charIndex, color);
     },
     
     addAnnotationMarker(annotation) {
