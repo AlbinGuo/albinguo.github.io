@@ -72,6 +72,7 @@ const App = {
             backToHistory: document.getElementById('backToHistory'),
             addAnnotationBtn: document.getElementById('addAnnotationBtn'),
             addCustomComment: document.getElementById('addCustomComment'),
+            addCustomCommentHeader: document.getElementById('addCustomCommentHeader'),
             customComment: document.getElementById('customComment'),
             commentModal: document.getElementById('commentModal'),
             closeCommentModal: document.getElementById('closeCommentModal'),
@@ -151,6 +152,12 @@ const App = {
         
         // 自定义评语添加
         this.elements.addCustomComment.addEventListener('click', () => {
+            this.pendingTemplateComment = null;
+            this.openCommentModal();
+        });
+        
+        // 自定义评语按钮（顶部）
+        this.elements.addCustomCommentHeader.addEventListener('click', () => {
             this.pendingTemplateComment = null;
             this.openCommentModal();
         });

@@ -921,6 +921,38 @@ body {
     background: #fff5f5;
 }
 
+.custom-comment-header {
+    padding: 0.5rem;
+}
+
+.custom-comment-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(197, 48, 48, 0.3);
+}
+
+.custom-comment-btn:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #c53030 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(197, 48, 48, 0.4);
+}
+
+.custom-comment-btn span {
+    font-size: 1rem;
+}
+
 /* Annotation number marker on character */
 .annotation-marker {
     position: absolute;
