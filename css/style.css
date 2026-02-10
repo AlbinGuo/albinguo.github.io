@@ -500,6 +500,7 @@ body {
     margin: 0 !important;
     background: transparent !important;
     flex-shrink: 0 !important;
+    position: relative !important;
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.empty {
@@ -583,13 +584,22 @@ body {
 
 .tian-grid-mode .text-grid.tian-grid .annotation-marker {
     position: absolute;
-    top: -8px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 20px;
     height: 20px;
+    background: #c53030;
+    color: white;
+    border-radius: 50%;
     font-size: 0.7rem;
-    z-index: 100;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.15s;
 }
 
 .tian-grid-mode .text-grid.tian-grid .paragraph-gap {
