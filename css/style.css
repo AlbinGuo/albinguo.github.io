@@ -110,8 +110,8 @@ body {
 
 .content-wrapper {
     display: grid;
-    grid-template-columns: 60% 40%;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 200px 380px;
+    gap: 1rem;
     height: 100%;
 }
 
@@ -165,6 +165,37 @@ body {
     color: var(--gray-500);
 }
 
+/* Paper Type Selector */
+.paper-selector {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.paper-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.paper-btn:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.paper-btn.active {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary);
+}
+
 /* Text Grid Container */
 .panel-body {
     flex: 1;
@@ -177,20 +208,16 @@ body {
 .text-grid-container {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden;
-    background: var(--gray-50);
-    border-radius: var(--radius);
-    border: 2px dashed var(--gray-300);
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
 }
 
 .text-grid {
-    padding: 1rem;
+    padding: 15px 20px;
     min-height: 100%;
-    display: none;
-}
-
-.text-grid.active {
-    display: block;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
 }
 
 .grid-placeholder {
@@ -198,67 +225,404 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    min-height: 300px;
-    color: var(--gray-400);
+    height: 200px;
+    color: #999;
     text-align: center;
+    font-family: inherit;
 }
 
 .grid-placeholder p {
     margin: 0.25rem 0;
 }
 
-/* Character Grid */
-.char-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
-    gap: 2px;
+/* Writing Paper Style - 作文纸效果 */
+.writing-paper {
+    display: block;
+    min-width: 100%;
+    padding: 0;
 }
 
-.char-cell {
-    width: 28px;
-    height: 32px;
+.text-grid:not(.tian-grid) .content-area {
+    padding: 5px 10px 5px 25px;
+}
+
+.text-grid:not(.tian-grid) .title-area {
+    background: white;
+    padding: 8px 20px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.text-grid:not(.tian-grid) .char-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    height: 28px;
+    position: relative;
+}
+
+.text-grid:not(.tian-grid) .char-row::before {
+    content: '';
+    position: absolute;
+    left: 25px;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: #a0cfff;
+}
+
+/* Line number on the left */
+.text-grid:not(.tian-grid) .line-number {
+    width: 25px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: 4px;
-    font-size: 14px;
-    color: var(--gray-800);
+    font-size: 10px;
+    color: #999;
+    flex-shrink: 0;
+    margin-right: 0;
+    font-family: Arial, sans-serif;
+}
+
+.char-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 16px;
+    color: #333;
     cursor: text;
     position: relative;
     transition: all 0.15s ease;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    user-select: none;
 }
 
 .char-cell:hover {
-    border-color: var(--primary);
     background: rgba(37, 99, 235, 0.05);
 }
 
-.char-cell:focus-within {
+.char-cell:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-}
-
-.char-cell.error {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: var(--danger);
-}
-
-.char-cell.suggest {
     background: rgba(37, 99, 235, 0.1);
     border-color: var(--primary);
 }
 
+.char-cell.error {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--danger);
+    color: #c53030;
+}
+
+.char-cell.error .red-pen-mark {
+    color: #c53030;
+}
+
+/* Red pen marks on cells */
+.red-pen-mark {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #c53030;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: "KaiTi", serif;
+}
+
+.char-cell:hover .red-pen-mark,
+.char-cell.error:hover .red-pen-mark {
+    opacity: 1;
+}
+
+/* Annotation marker on character */
+.annotation-marker {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    background: #c53030;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.15s;
+}
+
+.annotation-marker:hover {
+    transform: translateX(-50%) scale(1.2);
+}
+
+/* Character cell with annotation */
+.char-cell.has-annotation {
+    position: relative;
+    background: rgba(197, 48, 48, 0.1);
+    border-color: #c53030;
+}
+
+/* Selected range */
+.char-cell.selected {
+    background: rgba(197, 48, 48, 0.2);
+    border-color: #c53030;
+}
+
+/* ========== Tian Grid Style - 田字格 ========== */
+.tian-grid-mode .text-grid-container {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.tian-grid-mode .text-grid {
+    width: auto;
+    min-width: 100%;
+}
+
+.tian-grid-mode .text-grid.tian-grid {
+    min-width: calc(56px * 20 + 25px);
+    width: calc(56px * 20 + 25px);
+    max-width: calc(56px * 20 + 25px);
+    padding: 0;
+    background: transparent;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell {
+    position: relative;
+    border: 1px solid #a0cfff;
+    box-sizing: border-box;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #a0cfff;
+    transform: translateY(-50%);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #a0cfff;
+    transform: translateX(-50%);
+}
+
+.tian-grid-mode .text-grid.tian-grid .writing-paper {
+    background: transparent;
+    width: calc(56px * 20 + 25px);
+    min-width: calc(56px * 20 + 25px);
+    max-width: calc(56px * 20 + 25px);
+    padding: 0;
+}
+
+.tian-grid-mode .text-grid.tian-grid .title-area {
+    background: white;
+    padding: 8px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.tian-grid-mode .text-grid.tian-grid .author-row {
+    padding-right: 40px;
+}
+
+.tian-grid-mode .text-grid.tian-grid .content-area {
+    background: transparent;
+    width: calc(56px * 20 + 25px);
+    min-width: calc(56px * 20 + 25px);
+    max-width: calc(56px * 20 + 25px);
+    padding: 0;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    height: 56px;
+    width: calc(56px * 20 + 25px);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-row::before {
+    display: none;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell,
+.tian-grid-mode .text-grid.tian-grid .char-cell:hover,
+.tian-grid-mode .text-grid.tian-grid .char-cell:focus,
+.tian-grid-mode .text-grid.tian-grid .char-cell.error,
+.tian-grid-mode .text-grid.tian-grid .char-cell.selected,
+.tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    font-size: 32px !important;
+    line-height: 56px !important;
+    letter-spacing: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    flex-shrink: 0 !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.empty {
+    background: transparent !important;
+    color: transparent !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell:not(.empty):hover {
+    background: rgba(37, 99, 235, 0.1) !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell:not(.empty):focus {
+    background: rgba(37, 99, 235, 0.15) !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.error:not(.empty) {
+    background: rgba(239, 68, 68, 0.25) !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.selected:not(.empty) {
+    background: rgba(197, 48, 48, 0.35) !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation:not(.empty) {
+    background: rgba(197, 48, 48, 0.25) !important;
+}
+
+.char-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell .char-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell:hover {
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell:focus {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.error {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.selected {
+    background: rgba(197, 48, 48, 0.3);
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation {
+    background: rgba(197, 48, 48, 0.2);
+}
+
+.tian-grid-mode .text-grid.tian-grid .line-number {
+    height: 56px;
+    font-size: 12px;
+    width: 25px;
+    min-width: 25px;
+    flex-shrink: 0;
+    margin-right: 0;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.empty {
+    background: transparent !important;
+    color: transparent;
+}
+
+.tian-grid-mode .text-grid.tian-grid .annotation-marker {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    z-index: 100;
+}
+
+.tian-grid-mode .text-grid.tian-grid .paragraph-gap {
+    display: none;
+}
+
+/* Paragraph spacing */
+.paragraph-gap {
+    height: 0;
+    margin: 5px 0;
+    border: none;
+    position: relative;
+}
+
+.text-grid:not(.tian-grid) .paragraph-gap {
+    border-bottom: 1px solid #a0cfff;
+    height: 15px;
+}
+
+.text-grid:not(.tian-grid) .paragraph-gap::after {
+    content: attr(data-para);
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+    font-size: 10px;
+    color: #999;
+    font-family: Arial, sans-serif;
+}
+
+.char-cell.has-side-comment {
+    position: relative;
+}
+
+.char-cell.suggest {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: var(--primary);
+}
+
 .char-cell.content {
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(139, 92, 246, 0.15);
     border-color: var(--purple);
 }
 
 .char-cell.praise {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.15);
     border-color: var(--success);
 }
 
@@ -267,33 +631,97 @@ body {
     transform: scale(1.1);
 }
 
-.char-cell .line-num {
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    color: var(--gray-400);
-    background: var(--gray-100);
-    padding: 0 3px;
-}
-
-/* Paragraph line numbers */
-.paragraph-marker {
-    grid-column: 1 / -1;
+/* Paragraph spacing */
+.paragraph-gap {
     height: 20px;
-    border-bottom: 2px solid var(--gray-300);
-    margin: 8px 0;
+    border-bottom: 2px double #a0cfff;
+    margin: 5px 0;
     position: relative;
 }
 
-.paragraph-marker::after {
+.paragraph-gap::after {
     content: attr(data-para);
     position: absolute;
     right: 0;
     bottom: 2px;
     font-size: 10px;
-    color: var(--gray-400);
+    color: #999;
+    font-family: Arial, sans-serif;
+}
+
+/* Empty cell styling */
+.char-cell.empty {
+    color: transparent;
+}
+
+.char-cell.empty::before {
+    display: none;
+}
+
+/* Title area styling */
+.title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    min-height: 35px;
+}
+    min-height: 35px;
+    position: relative;
+}
+
+.title-cell {
+    min-width: 50px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+}
+
+.title-placeholder {
+    color: #ccc;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+/* Author name area */
+.author-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    min-height: 28px;
+    padding-right: 40px;
+}
+
+.author-label {
+    font-size: 12px;
+    color: #999;
+    margin-right: 10px;
+}
+
+.author-cell {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 14px;
+    color: #333;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    user-select: none;
+}
+
+.author-cell:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
 }
 
 /* Panel Footer */
@@ -304,6 +732,313 @@ body {
     padding: 1rem 1.25rem;
     border-top: 1px solid var(--gray-200);
     background: var(--gray-50);
+}
+
+/* Side Comment Panel */
+.side-comment-panel {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.side-comment-panel .panel-header {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-200);
+    background: #fff5f5;
+    flex-shrink: 0;
+}
+
+.side-comment-panel .panel-header h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #c53030;
+}
+
+.side-comment-panel .panel-body {
+    padding: 0.75rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.side-comment-empty {
+    text-align: center;
+    padding: 1rem;
+    color: var(--gray-400);
+    font-size: 0.8rem;
+}
+
+/* Add annotation button */
+.add-annotation-row {
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.add-annotation-btn {
+    width: 100%;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #c53030, #e53e3e);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-annotation-btn:hover {
+    background: linear-gradient(135deg, #9b2c2c, #c53030);
+}
+
+.add-annotation-btn:disabled {
+    background: var(--gray-300);
+    cursor: not-allowed;
+}
+
+/* Side Comment Items */
+.side-comment-item {
+    background: #fff9f9;
+    border: 1px dashed #fc8181;
+    border-radius: 6px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.side-comment-item:hover {
+    background: #fff5f5;
+    border-color: #c53030;
+}
+
+.side-comment-item .line-ref {
+    font-size: 0.7rem;
+    color: #c53030;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.side-comment-item .comment-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: #c53030;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: bold;
+}
+
+.side-comment-item .comment-text {
+    font-size: 0.8rem;
+    color: #742a2a;
+    font-family: "KaiTi", "STKaiti", serif;
+    line-height: 1.4;
+}
+
+.side-comment-item .delete-btn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    border: none;
+    background: transparent;
+    color: #c53030;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.side-comment-item:hover .delete-btn {
+    opacity: 1;
+}
+
+/* Custom comment input */
+.custom-comment {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--gray-300);
+}
+
+.custom-comment textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    resize: none;
+    font-family: inherit;
+}
+
+.custom-comment textarea:focus {
+    outline: none;
+    border-color: #c53030;
+}
+
+.add-comment-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.4rem;
+    background: white;
+    color: #c53030;
+    border: 1px solid #c53030;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-comment-btn:hover {
+    background: #fff5f5;
+}
+
+/* Annotation number marker on character */
+.annotation-marker {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    background: #c53030;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.15s;
+}
+
+.annotation-marker:hover {
+    transform: translateX(-50%) scale(1.2);
+}
+
+/* Character cell with annotation */
+.char-cell.has-annotation {
+    position: relative;
+    background: rgba(197, 48, 48, 0.1);
+    border-color: #c53030;
+}
+
+/* Selected range */
+.char-cell.selected {
+    background: rgba(197, 48, 48, 0.2);
+    border-color: #c53030;
+}
+
+/* Red pen annotation style */
+.red-pen-annotation {
+    position: absolute;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-family: "KaiTi", "STKaiti", serif;
+    font-size: 12px;
+    color: #c53030;
+    background: transparent;
+    border: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-height: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.char-row:hover .red-pen-annotation {
+    opacity: 1;
+}
+
+/* Comment Templates */
+.comment-templates {
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    flex-shrink: 0;
+}
+
+.templates-header {
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.templates-header:hover {
+    background: var(--gray-100);
+}
+
+.toggle-templates {
+    border: none;
+    background: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.templates-body {
+    padding: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.template-category {
+    margin-bottom: 0.5rem;
+}
+
+.template-category-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 0.25rem;
+}
+
+.template-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.template-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-600);
+}
+
+.template-btn:hover {
+    border-color: #c53030;
+    color: #c53030;
+    background: #fff5f5;
 }
 
 /* Grading Panel */
@@ -337,6 +1072,66 @@ body {
 
 .eval-body {
     padding: 1rem;
+}
+
+/* Score Details */
+.score-details {
+    margin-bottom: 1rem;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.score-label {
+    width: 40px;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.score-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #60a5fa);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.score-value {
+    width: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    text-align: right;
+}
+
+.score-total {
+    text-align: center;
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: var(--radius);
+}
+
+.score-total span:first-child {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #d97706;
+}
+
+.score-total .unit {
+    font-size: 0.9rem;
+    color: #92400e;
 }
 
 .essay-title-display {
@@ -671,7 +1466,107 @@ body {
     color: var(--gray-500);
 }
 
-/* History Page */
+/* History Comparison */
+.history-comparison {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.comparison-header h3 {
+    font-size: 1rem;
+    color: var(--gray-800);
+}
+
+.comparison-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.comparison-record {
+    flex: 1;
+    max-width: 300px;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+}
+
+.comparison-date {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-bottom: 0.75rem;
+}
+
+.comparison-scores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.comparison-score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.comparison-score-item .label {
+    color: var(--gray-500);
+}
+
+.comparison-score-item .value {
+    font-weight: 600;
+}
+
+.comparison-arrow {
+    font-size: 1.5rem;
+    color: var(--gray-400);
+}
+
+.comparison-summary {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-radius: var(--radius);
+    text-align: center;
+    font-size: 0.9rem;
+    color: #065f46;
+}
+
+.compare-tip {
+    text-align: center;
+    padding: 1rem;
+    background: #fffbeb;
+    border-radius: var(--radius);
+    color: #92400e;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.history-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.history-actions .btn-primary {
+    background: var(--primary);
+}
 .history-page,
 .help-page {
     max-width: 1000px;
@@ -720,6 +1615,15 @@ body {
 
 .history-item:hover {
     background: var(--gray-100);
+}
+
+.history-item.comparison-selectable {
+    border: 2px solid var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.history-item.comparison-selectable:hover {
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .history-info h4 {
@@ -884,6 +1788,58 @@ body {
 
 .modal-footer .btn-primary {
     padding: 0.5rem 1.5rem;
+}
+
+/* Comment Modal */
+.comment-modal {
+    max-width: 450px;
+}
+
+.comment-modal .modal-body {
+    padding: 1rem;
+}
+
+.selected-range-display {
+    background: #fef3c7;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #92400e;
+    margin-bottom: 0.75rem;
+}
+
+.selected-range-display span {
+    font-weight: 600;
+}
+
+.comment-modal textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.comment-modal textarea:focus {
+    outline: none;
+    border-color: #c53030;
+    box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+}
+
+.comment-modal .modal-footer {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.comment-modal .btn-primary {
+    background: linear-gradient(135deg, #c53030, #e53e3e);
+}
+
+.comment-modal .btn-primary:hover {
+    background: linear-gradient(135deg, #9b2c2c, #c53030);
 }
 
 /* Toast */

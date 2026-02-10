@@ -35,17 +35,16 @@
                             <div class="essay-meta">
                                 <input type="text" id="essayTitle" placeholder="输入作文标题..." class="title-input">
                                 <span class="char-count" id="charCount">0 字</span>
+                                <div class="paper-selector">
+                                    <button class="paper-btn active" data-paper="writing" title="作文纸">📄</button>
+                                    <button class="paper-btn" data-paper="tian" title="田字格">▦</button>
+                                </div>
                             </div>
                         </div>
                         <div class="panel-body">
-                            <!-- 文字格容器 -->
                             <div class="text-grid-container" id="textGridContainer">
-                                <div class="text-grid" id="textGrid">
-                                    <div class="grid-placeholder">
-                                        <p>在此输入作文内容</p>
-                                        <p>每个格子一个字，支持粘贴大段文本</p>
-                                    </div>
-                                </div>
+                                <div class="connection-overlay" id="connectionOverlay"></div>
+                                <div class="text-grid" id="textGrid"></div>
                             </div>
                         </div>
                         <div class="panel-footer">
@@ -53,6 +52,126 @@
                             <button class="btn-primary" id="gradeBtn">
                                 <span>开始批改</span>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- 中间：旁批区域 -->
+                    <div class="side-comment-panel" id="sideCommentPanel">
+                        <div class="panel-header">
+                            <h3>📝 批改标注</h3>
+                            <button class="toggle-btn" id="toggleSideComments">收起 ▼</button>
+                        </div>
+                        <div class="panel-body" id="sideCommentBody">
+                            <div class="side-comment-empty">
+                                <p>选中文字后点击评语添加批改</p>
+                            </div>
+                        </div>
+                        <!-- 添加批改按钮 -->
+                        <div class="add-annotation-row">
+                            <button class="add-annotation-btn" id="addAnnotationBtn">
+                                + 添加批改
+                            </button>
+                        </div>
+                        <!-- 评语模板 -->
+                        <div class="comment-templates">
+                            <div class="templates-header">
+                                <span>💬 常用评语</span>
+                                <button class="toggle-templates" id="toggleTemplates">▼</button>
+                            </div>
+                            <div class="templates-body hidden" id="templatesBody">
+                                <div class="template-category">
+                                    <div class="template-category-title">👍 优点表扬</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头简洁，点明主题，很好！">开头简洁</button>
+                                        <button class="template-btn" data-comment="结尾总结到位，升华主题。">结尾升华</button>
+                                        <button class="template-btn" data-comment="中间叙事生动，细节描写精彩！">细节生动</button>
+                                        <button class="template-btn" data-comment="过渡自然，段落衔接流畅。">过渡自然</button>
+                                        <button class="template-btn" data-comment="语言优美，富有感染力。">语言优美</button>
+                                        <button class="template-btn" data-comment="描写细腻，感受真切。">感受真切</button>
+                                        <button class="template-btn" data-comment="想象丰富，构思巧妙。">想象丰富</button>
+                                        <button class="template-btn" data-comment="用词准确，表达清晰。">用词准确</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">🔧 改进建议</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头可以再简洁一些，直接入题。">开头入题</button>
+                                        <button class="template-btn" data-comment="中间内容略显单薄，可增加细节描写。">增加细节</button>
+                                        <button class="template-btn" data-comment="结尾有些仓促，可以更具体地表达情感。">结尾具体</button>
+                                        <button class="template-btn" data-comment="注意错别字，请及时订正。">错别字</button>
+                                        <button class="template-btn" data-comment="语句不够通顺，建议多读几遍。">语句通顺</button>
+                                        <button class="template-btn" data-comment="过渡不够自然，注意段落间的衔接。">段落衔接</button>
+                                        <button class="template-btn" data-comment="描写不够具体，要写出细节。">细节描写</button>
+                                        <button class="template-btn" data-comment="注意标点符号的使用。">标点符号</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">📝 常用评语</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="文章层次分明，条理清晰。">层次分明</button>
+                                        <button class="template-btn" data-comment="书写工整，值得表扬！">书写工整</button>
+                                        <button class="template-btn" data-comment="态度认真，继续保持！">态度认真</button>
+                                        <button class="template-btn" data-comment="进步很大，继续努力！">进步很大</button>
+                                        <button class="template-btn" data-comment="再接再厉，期待更优秀的作品！">再接再厉</button>
+                                    </div>
+                                </div>
+                                <!-- 自定义评语输入 -->
+                                <div class="custom-comment">
+                                    <textarea id="customComment" placeholder="输入自定义评语..." rows="2"></textarea>
+                                    <button class="add-comment-btn" id="addCustomComment">添加</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="panel-body" id="sideCommentBody">
+                            <div class="side-comment-empty">
+                                <p>批改时点击作文行可在右侧添加旁批</p>
+                            </div>
+                        </div>
+                        <!-- 评语模板 -->
+                        <div class="comment-templates">
+                            <div class="templates-header">
+                                <span>💬 常用评语</span>
+                                <button class="toggle-templates" id="toggleTemplates">▼</button>
+                            </div>
+                            <div class="templates-body hidden" id="templatesBody">
+                                <div class="template-category">
+                                    <div class="template-category-title">👍 优点表扬</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头简洁，点明主题，很好！">开头简洁</button>
+                                        <button class="template-btn" data-comment="结尾总结到位，升华主题。">结尾升华</button>
+                                        <button class="template-btn" data-comment="中间叙事生动，细节描写精彩！">细节生动</button>
+                                        <button class="template-btn" data-comment="过渡自然，段落衔接流畅。">过渡自然</button>
+                                        <button class="template-btn" data-comment="语言优美，富有感染力。">语言优美</button>
+                                        <button class="template-btn" data-comment="描写细腻，感受真切。">感受真切</button>
+                                        <button class="template-btn" data-comment="想象丰富，构思巧妙。">想象丰富</button>
+                                        <button class="template-btn" data-comment="用词准确，表达清晰。">用词准确</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">🔧 改进建议</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头可以再简洁一些，直接入题。">开头入题</button>
+                                        <button class="template-btn" data-comment="中间内容略显单薄，可增加细节描写。">增加细节</button>
+                                        <button class="template-btn" data-comment="结尾有些仓促，可以更具体地表达情感。">结尾具体</button>
+                                        <button class="template-btn" data-comment="注意错别字，请及时订正。">错别字</button>
+                                        <button class="template-btn" data-comment="语句不够通顺，建议多读几遍。">语句通顺</button>
+                                        <button class="template-btn" data-comment="过渡不够自然，注意段落间的衔接。">段落衔接</button>
+                                        <button class="template-btn" data-comment="描写不够具体，要写出细节。">细节描写</button>
+                                        <button class="template-btn" data-comment="注意标点符号的使用。">标点符号</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">📝 常用评语</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="文章层次分明，条理清晰。">层次分明</button>
+                                        <button class="template-btn" data-comment="书写工整，值得表扬！">书写工整</button>
+                                        <button class="template-btn" data-comment="态度认真，继续保持！">态度认真</button>
+                                        <button class="template-btn" data-comment="进步很大，继续努力！">进步很大</button>
+                                        <button class="template-btn" data-comment="再接再厉，期待更优秀的作品！">再接再厉</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -68,18 +187,47 @@
                                     <span class="label">作文标题：</span>
                                     <span class="value">未命名</span>
                                 </div>
-                                <div class="score-display">
-                                    <div class="stars" id="starRating">
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star">★</span>
+                                <!-- 分数详情 -->
+                                <div class="score-details" id="scoreDetails">
+                                    <div class="score-item">
+                                        <span class="score-label">内容</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" id="scoreContent" style="width: 75%"></div>
+                                        </div>
+                                        <span class="score-value" id="scoreContentValue">75</span>
                                     </div>
-                                    <div class="score-value">
-                                        <span id="totalScore">0</span>
-                                        <span class="unit">分</span>
+                                    <div class="score-item">
+                                        <span class="score-label">语言</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" id="scoreLanguage" style="width: 75%"></div>
+                                        </div>
+                                        <span class="score-value" id="scoreLanguageValue">75</span>
                                     </div>
+                                    <div class="score-item">
+                                        <span class="score-label">结构</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" id="scoreStructure" style="width: 75%"></div>
+                                        </div>
+                                        <span class="score-value" id="scoreStructureValue">75</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <span class="score-label">文采</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" id="scoreStyle" style="width: 70%"></div>
+                                        </div>
+                                        <span class="score-value" id="scoreStyleValue">70</span>
+                                    </div>
+                                </div>
+                                <div class="stars" id="starRating">
+                                    <span class="star filled">★</span>
+                                    <span class="star filled">★</span>
+                                    <span class="star filled">★</span>
+                                    <span class="star filled">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                                <div class="score-total">
+                                    <span id="totalScore">0</span>
+                                    <span class="unit">分</span>
                                 </div>
                                 <div class="overall-comment" id="overallComment">
                                     <p>提交作文后将显示综合评价</p>
@@ -131,12 +279,40 @@
                 <div class="history-container">
                     <div class="history-header">
                         <h2>📚 历史批改记录</h2>
-                        <button class="btn-secondary" id="clearHistoryBtn">清空历史</button>
+                        <div class="history-actions">
+                            <button class="btn-secondary" id="clearHistoryBtn">清空历史</button>
+                        </div>
                     </div>
+                    
+                    <!-- 历史对比模式 -->
+                    <div class="history-comparison hidden" id="historyComparison">
+                        <div class="comparison-header">
+                            <h3>📊 批改对比</h3>
+                            <button class="btn-secondary" id="backToHistory">返回列表</button>
+                        </div>
+                        <div class="comparison-body">
+                            <div class="comparison-record" id="comparisonRecord1">
+                                <div class="comparison-date" id="compDate1"></div>
+                                <div class="comparison-scores" id="compScores1"></div>
+                            </div>
+                            <div class="comparison-arrow">→</div>
+                            <div class="comparison-record" id="comparisonRecord2">
+                                <div class="comparison-date" id="compDate2"></div>
+                                <div class="comparison-scores" id="compScores2"></div>
+                            </div>
+                        </div>
+                        <div class="comparison-summary" id="comparisonSummary"></div>
+                    </div>
+                    
                     <div class="history-list" id="historyList">
                         <div class="empty-state">
                             <p>暂无历史记录</p>
                         </div>
+                    </div>
+                    
+                    <!-- 选择对比记录提示 -->
+                    <div class="compare-tip hidden" id="compareTip">
+                        <p>📌 点击另一条记录进行对比</p>
                     </div>
                 </div>
             </section>
@@ -222,6 +398,26 @@
 
     <!-- Toast -->
     <div class="toast hidden" id="toast"></div>
+
+    <!-- 自定义批改输入弹窗 -->
+    <div class="modal-overlay hidden" id="commentModal">
+        <div class="modal comment-modal">
+            <div class="modal-header">
+                <h3>📝 添加批改</h3>
+                <button class="close-btn" id="closeCommentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-range-display" id="selectedRangeDisplay">
+                    已选中：第 <span id="selectedStart">0</span> - <span id="selectedEnd">0</span> 字
+                </div>
+                <textarea id="commentInput" placeholder="输入批注内容..." rows="4"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelComment">取消</button>
+                <button class="btn-primary" id="confirmComment">确认添加</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/app.js"></script>
 </body>
