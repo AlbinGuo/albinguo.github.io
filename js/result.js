@@ -50,21 +50,24 @@ const ResultPage = {
     },
     
     showEmpty() {
-        document.querySelector('.result-main').innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
-                <h2 style="margin-bottom: 0.5rem;">暂无批改结果</h2>
-                <p style="color: var(--gray-500); margin-bottom: 1.5rem;">请先提交作文进行批改</p>
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <a href="index.html" class="btn-primary" style="display: inline-block;">去批改</a>
-                    <button onclick="ResultPage.loadDemo()" class="btn-secondary" style="display: inline-block;">查看示例</button>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--gray-400); margin-top: 1rem;" id="debugInfo"></p>
-            </div>
-        `;
+        // 只在原文区域显示空状态
+        const essayEl = document.getElementById('essayContent');
+        const headerInfo = document.getElementById('essayHeaderInfo');
+        
+        if (headerInfo) {
+            headerInfo.innerHTML = '<div class="meta">暂无数据</div>';
+        }
+        if (essayEl) {
+            essayEl.innerHTML = '<p class="placeholder">请从历史记录中选择一条批改结果查看</p>';
+        }
+        
         // 显示调试信息
-        const stored = localStorage.getItem('lastResult');
-        document.getElementById('debugInfo').textContent = stored ? 'localStorage中有数据' : 'localStorage中无数据';
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
+        console.log('URL参数ID:', id);
+        console.log('历史记录数量:', history.length);
+        console.log('历史记录IDs:', history.map(h => h.id));
     },
     
     loadDemo() {
@@ -93,75 +96,79 @@ const ResultPage = {
     },
     
     render() {
-        console.log('开始渲染，数据:', this.data ? '有数据' : '无数据');
+        console.log('=== 开始渲染 ===');
+        console.log('this.data:', this.data);
         
         if (!this.data) {
+            console.log('数据为空，显示空状态');
             this.showEmpty();
             return;
         }
         
+        console.log('数据存在，继续渲染');
+        console.log('originalText:', this.data.originalText);
+        console.log('title:', this.data.title);
+        console.log('author:', this.data.author);
+        console.log('sideComments:', this.data.sideComments);
+        
         const { scores, stats, comments, suggestions, originalText, title, author, sideComments } = this.data;
-        console.log('原文长度:', originalText ? originalText.length : 0);
-        console.log('批注数量:', sideComments ? sideComments.length : 0);
+        const errors = this.data.errors || [];
         
         // 显示标题和作者
         const headerInfo = document.getElementById('essayHeaderInfo');
-        const date = new Date(this.data.timestamp).toLocaleDateString();
-        headerInfo.innerHTML = `
-            <div class="title">${title || '未命名'}</div>
-            <div class="meta">
-                ${author ? `👤 ${author} · ` : ''}📅 ${date}
-            </div>
-        `;
+        if (headerInfo) {
+            const date = new Date(this.data.timestamp).toLocaleDateString();
+            headerInfo.innerHTML = `
+                <div class="title">${title || '未命名'}</div>
+                <div class="meta">
+                    ${author ? `👤 ${author} · ` : ''}📅 ${date}
+                </div>
+            `;
+        }
         
         // 总分
-        this.animateScore('scoreValue', scores.overall, (value, el) => {
-            el.textContent = value;
-        });
+        const scoreValueEl = document.getElementById('scoreValue');
+        if (scoreValueEl) {
+            scoreValueEl.textContent = scores.overall;
+        }
         
         // 等级
         const level = document.getElementById('scoreLevel');
         const circle = document.getElementById('scoreCircle');
         
         if (scores.overall >= 85) {
-            level.textContent = '优秀';
-            circle.className = 'score-circle excellent';
+            if (level) level.textContent = '优秀';
+            if (circle) circle.className = 'score-circle excellent';
         } else if (scores.overall >= 70) {
-            level.textContent = '良好';
-            circle.className = 'score-circle good';
+            if (level) level.textContent = '良好';
+            if (circle) circle.className = 'score-circle good';
         } else if (scores.overall >= 60) {
-            level.textContent = '合格';
-            circle.className = 'score-circle average';
+            if (level) level.textContent = '合格';
+            if (circle) circle.className = 'score-circle average';
         } else {
-            level.textContent = '待提高';
-            circle.className = 'score-circle poor';
+            if (level) level.textContent = '待提高';
+            if (circle) circle.className = 'score-circle poor';
         }
         
-        document.getElementById('overallComment').textContent = comments.overall;
+        const overallComment = document.getElementById('overallComment');
+        if (overallComment) overallComment.textContent = comments.overall;
         
         // 统计
-        document.getElementById('charCount').textContent = stats.chars;
-        document.getElementById('paraCount').textContent = stats.paragraphs;
-        document.getElementById('errorCount').textContent = errors.length;
+        const charCount = document.getElementById('charCount');
+        const paraCount = document.getElementById('paraCount');
+        const errorCount = document.getElementById('errorCount');
         
-        // 分项评分
-        this.animateScore('contentScore', scores.content, (v, el) => el.textContent = v);
-        this.animateScore('structureScore', scores.structure, (v, el) => el.textContent = v);
-        this.animateScore('languageScore', scores.language, (v, el) => el.textContent = v);
-        this.animateScore('styleScore', scores.style, (v, el) => el.textContent = v);
-        
-        // 进度条
-        this.setBarWidth('contentBar', scores.content);
-        this.setBarWidth('structureBar', scores.structure);
-        this.setBarWidth('languageBar', scores.language);
-        this.setBarWidth('styleBar', scores.style);
+        if (charCount) charCount.textContent = stats.chars;
+        if (paraCount) paraCount.textContent = stats.paragraphs;
+        if (errorCount) errorCount.textContent = errors.length;
         
         // 原文和批注
         const essayEl = document.getElementById('essayContent');
+        console.log('essayEl:', essayEl);
         
-        // 渲染原文全文，带批注标注
-        let essayHTML = '';
-        if (originalText) {
+        if (essayEl && originalText) {
+            console.log('开始渲染原文');
+            let essayHTML = '';
             const chars = originalText.split('');
             
             // 创建字符到批注的映射
@@ -181,7 +188,6 @@ const ResultPage = {
             chars.forEach((char, index) => {
                 const annotation = annotationMap[index];
                 if (annotation) {
-                    const colorLabels = { red: '纠错', yellow: '建议', green: '表扬' };
                     essayHTML += `<span class="char-with-annotation ${annotation.color || 'red'}" title="${annotation.comment}">${char}<span class="annotation-badge">${annotation.number}</span></span>`;
                 } else {
                     essayHTML += `<span class="char">${char}</span>`;
@@ -189,55 +195,12 @@ const ResultPage = {
             });
             
             essayEl.innerHTML = essayHTML;
-        } else {
+            console.log('原文渲染完成');
+        } else if (essayEl) {
             essayEl.innerHTML = '<p class="placeholder">暂无内容</p>';
         }
         
-        // 批注列表
-        const sugEl = document.getElementById('suggestionsList');
-        if (sideComments && sideComments.length > 0) {
-            const colorLabels = { red: '纠错', yellow: '建议', green: '表扬' };
-            sugEl.innerHTML = sideComments.map(item => `
-                <li class="annotation-item annotation-${item.color || 'red'}">
-                    <div class="annotation-header">
-                        <span class="annotation-number">${item.number}</span>
-                        <span class="annotation-label">${colorLabels[item.color] || '纠错'}</span>
-                        ${item.startIndex !== null ? `<span class="annotation-position">第 ${item.startIndex + 1} 字</span>` : ''}
-                    </div>
-                    <div class="annotation-content">${item.comment}</div>
-                </li>
-            `).join('');
-        } else if (suggestions && suggestions.length > 0) {
-            sugEl.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
-        } else {
-            sugEl.innerHTML = '<li class="placeholder">暂无批注</li>';
-        }
-        
-        // 评语
-        const comEl = document.getElementById('commentsBox');
-        comEl.innerHTML = `
-            <p><strong>内容：</strong>${comments.content}</p>
-            <p><strong>结构：</strong>${comments.structure}</p>
-            <p><strong>语言：</strong>${comments.language}</p>
-            <p><strong>文采：</strong>${comments.style}</p>
-        `;
-        
-        // 错误详情
-        const errorCard = document.getElementById('errorCard');
-        const errorList = document.getElementById('errorList');
-        
-        if (errors.length > 0) {
-            errorCard.hidden = false;
-            errorList.innerHTML = errors.map(e => `
-                <li>
-                    <div class="error-type">${e.type}</div>
-                    <div class="error-text">"${e.text}"</div>
-                    <div class="error-suggestion">💡 ${e.suggestion}</div>
-                </li>
-            `).join('');
-        } else {
-            errorCard.hidden = true;
-        }
+        console.log('渲染完成');
     },
     
     animateScore(id, target, callback) {
