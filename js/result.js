@@ -86,7 +86,7 @@ const ResultPage = {
     },
     
     render() {
-        const { scores, stats, errors, comments, suggestions, originalText, annotatedText, title, author } = this.data;
+        const { scores, stats, errors, comments, suggestions, originalText, title, author, sideComments, annotations } = this.data;
         
         // 显示标题和作者
         const headerInfo = document.getElementById('essayHeaderInfo');
@@ -140,20 +140,61 @@ const ResultPage = {
         this.setBarWidth('languageBar', scores.language);
         this.setBarWidth('styleBar', scores.style);
         
-        // 原文
+        // 原文和批注
         const essayEl = document.getElementById('essayContent');
-        if (annotatedText && annotatedText !== originalText && errors.length > 0) {
-            essayEl.innerHTML = annotatedText;
+        
+        // 渲染原文全文，带批注标注
+        let essayHTML = '';
+        if (originalText) {
+            const chars = originalText.split('');
+            
+            // 创建字符到批注的映射
+            const annotationMap = {};
+            if (sideComments && sideComments.length > 0) {
+                sideComments.forEach(annotation => {
+                    if (annotation.startIndex !== null) {
+                        const endIndex = annotation.endIndex !== null ? annotation.endIndex : annotation.startIndex;
+                        for (let i = annotation.startIndex; i <= endIndex; i++) {
+                            annotationMap[i] = annotation;
+                        }
+                    }
+                });
+            }
+            
+            // 构建原文HTML
+            chars.forEach((char, index) => {
+                const annotation = annotationMap[index];
+                if (annotation) {
+                    const colorLabels = { red: '纠错', yellow: '建议', green: '表扬' };
+                    essayHTML += `<span class="char-with-annotation ${annotation.color || 'red'}" title="${annotation.comment}">${char}<span class="annotation-badge">${annotation.number}</span></span>`;
+                } else {
+                    essayHTML += `<span class="char">${char}</span>`;
+                }
+            });
+            
+            essayEl.innerHTML = essayHTML;
         } else {
-            essayEl.innerHTML = `<p>${originalText.replace(/\n/g, '<br>')}</p>`;
+            essayEl.innerHTML = '<p class="placeholder">暂无内容</p>';
         }
         
-        // 建议
+        // 批注列表
         const sugEl = document.getElementById('suggestionsList');
-        if (suggestions.length > 0) {
+        if (sideComments && sideComments.length > 0) {
+            const colorLabels = { red: '纠错', yellow: '建议', green: '表扬' };
+            sugEl.innerHTML = sideComments.map(item => `
+                <li class="annotation-item annotation-${item.color || 'red'}">
+                    <div class="annotation-header">
+                        <span class="annotation-number">${item.number}</span>
+                        <span class="annotation-label">${colorLabels[item.color] || '纠错'}</span>
+                        ${item.startIndex !== null ? `<span class="annotation-position">第 ${item.startIndex + 1} 字</span>` : ''}
+                    </div>
+                    <div class="annotation-content">${item.comment}</div>
+                </li>
+            `).join('');
+        } else if (suggestions && suggestions.length > 0) {
             sugEl.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
         } else {
-            sugEl.innerHTML = '<li class="placeholder">暂无建议</li>';
+            sugEl.innerHTML = '<li class="placeholder">暂无批注</li>';
         }
         
         // 评语

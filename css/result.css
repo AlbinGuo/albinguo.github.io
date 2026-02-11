@@ -178,6 +178,146 @@
     padding: 2rem;
 }
 
+/* Annotated characters in essay */
+.char-with-annotation {
+    position: relative;
+    display: inline-block;
+    padding: 1px 0;
+    margin: 0 1px;
+    border-radius: 2px;
+}
+
+.char-with-annotation.red {
+    background: rgba(197, 48, 48, 0.15);
+    border-bottom: 2px solid #c53030;
+}
+
+.char-with-annotation.yellow {
+    background: rgba(245, 158, 11, 0.15);
+    border-bottom: 2px solid #d97706;
+}
+
+.char-with-annotation.green {
+    background: rgba(16, 185, 129, 0.15);
+    border-bottom: 2px solid #059669;
+}
+
+.annotation-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 14px;
+    height: 14px;
+    padding: 0 3px;
+    font-size: 0.55rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.char-with-annotation.red .annotation-badge {
+    background: #c53030;
+}
+
+.char-with-annotation.yellow .annotation-badge {
+    background: #d97706;
+}
+
+.char-with-annotation.green .annotation-badge {
+    background: #059669;
+}
+
+/* Annotation list in suggestions */
+.annotation-item {
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    border-left: 3px solid var(--primary);
+}
+
+.annotation-item.annotation-red {
+    background: #fef2f2;
+    border-left-color: #c53030;
+}
+
+.annotation-item.annotation-yellow {
+    background: #fffbeb;
+    border-left-color: #d97706;
+}
+
+.annotation-item.annotation-green {
+    background: #ecfdf5;
+    border-left-color: #059669;
+}
+
+.annotation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.annotation-number {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.annotation-item.annotation-red .annotation-number {
+    background: #c53030;
+}
+
+.annotation-item.annotation-yellow .annotation-number {
+    background: #d97706;
+}
+
+.annotation-item.annotation-green .annotation-number {
+    background: #059669;
+}
+
+.annotation-label {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+}
+
+.annotation-item.annotation-red .annotation-label {
+    background: rgba(197, 48, 48, 0.1);
+    color: #c53030;
+}
+
+.annotation-item.annotation-yellow .annotation-label {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.annotation-item.annotation-green .annotation-label {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.annotation-position {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+
+.annotation-content {
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
 .error {
     background: rgba(239, 68, 68, 0.15);
     color: #dc2626;
