@@ -24,14 +24,21 @@ const ResultPage = {
             // 从URL参数获取ID
             const urlParams = new URLSearchParams(window.location.search);
             const id = parseInt(urlParams.get('id'));
+            console.log('URL参数ID:', id);
             
             if (id) {
                 // 从历史记录中查找
                 const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
+                console.log('历史记录数量:', history.length);
                 this.data = history.find(item => item.id === id);
+                console.log('找到的数据:', this.data ? '有数据' : '无数据');
+                if (this.data) {
+                    console.log('数据内容:', this.data.originalText ? '有原文' : '无原文');
+                }
             } else {
                 // 从lastResult读取
                 const stored = localStorage.getItem('lastResult');
+                console.log('lastResult数据:', stored ? '有数据' : '无数据');
                 if (stored) {
                     this.data = JSON.parse(stored);
                 }
@@ -86,7 +93,16 @@ const ResultPage = {
     },
     
     render() {
-        const { scores, stats, errors, comments, suggestions, originalText, title, author, sideComments, annotations } = this.data;
+        console.log('开始渲染，数据:', this.data ? '有数据' : '无数据');
+        
+        if (!this.data) {
+            this.showEmpty();
+            return;
+        }
+        
+        const { scores, stats, comments, suggestions, originalText, title, author, sideComments } = this.data;
+        console.log('原文长度:', originalText ? originalText.length : 0);
+        console.log('批注数量:', sideComments ? sideComments.length : 0);
         
         // 显示标题和作者
         const headerInfo = document.getElementById('essayHeaderInfo');
