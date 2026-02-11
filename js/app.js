@@ -160,13 +160,9 @@ const App = {
         
         // 评语模板折叠
         this.elements.toggleTemplates.addEventListener('click', () => {
-            this.elements.templatesBody.classList.toggle('collapsed');
-            const svg = this.elements.toggleTemplates.querySelector('svg');
-            if (svg) {
-                svg.style.transform = this.elements.templatesBody.classList.contains('collapsed')
-                    ? 'rotate(0deg)'
-                    : 'rotate(180deg)';
-            }
+            this.elements.templatesBody.classList.toggle('hidden');
+            this.elements.toggleTemplates.textContent = 
+                this.elements.templatesBody.classList.contains('hidden') ? '▼' : '▲';
         });
         
         // 评语模板按钮点击
@@ -477,7 +473,7 @@ const App = {
     },
     
     insertText(text) {
-        const contentArea = document.getElementById('textGrid');
+        const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = '';
         
         this.textGrid = [];
@@ -1138,36 +1134,39 @@ const App = {
     displayResult(result) {
         const authorDisplay = result.author ? `<span class="label">姓名：</span><span class="value">${result.author}</span>` : '';
         this.elements.essayTitleDisplay.innerHTML = `
-            <span class="label">标题：</span>
+            <span class="label">作文标题：</span>
             <span class="value">${result.title}</span>
+            ${authorDisplay}
         `;
-
+        
         // 显示分数详情
         this.displayScoreDetails(result.scores);
-
-        // 动画显示总分圆环
-        this.animateScoreRing(result.scores.overall);
-
-        this.elements.overallComment.innerHTML = `<p>${result.comments.overall}</p>`;
-
-        // 显示批注数量
-        const annotationCount = document.getElementById('annotationCount');
-        if (annotationCount) {
-            annotationCount.textContent = result.annotations ? result.annotations.length : 0;
-        }
-
+        
+        this.elements.totalScore.textContent = result.scores.overall;
+        
+        const stars = this.elements.starRating.querySelectorAll('.star');
+        const filledCount = Math.round(result.scores.overall / 20);
+        stars.forEach((star, i) => {
+            star.classList.toggle('filled', i < filledCount);
+        });
+        
+        this.elements.overallComment.innerHTML = `<p><strong>【整体评价】</strong> ${result.comments.overall}</p>`;
+        
+        this.elements.summaryList.innerHTML = `
+            <li class="summary-item">
+                <span class="tag positive">✓ 优点</span>
+                <p>${result.comments.positive}</p>
+            </li>
+            <li class="summary-item">
+                <span class="tag suggest">💡 建议</span>
+                <p>${result.comments.suggestionsSummary}</p>
+            </li>
+        `;
+        
         // 加载旁批
         this.loadSideComments(result.sideComments || []);
-    },
-
-    // 动画显示分数圆环
-    animateScoreRing(score) {
-        const scoreRingProgress = document.getElementById('scoreRingProgress');
-        if (scoreRingProgress) {
-            const circumference = 163; // 圆周长
-            const offset = circumference - (score / 100 * circumference);
-            scoreRingProgress.style.strokeDashoffset = offset;
-        }
+        
+        this.renderDetails(result.annotations);
     },
     
     renderDetails(annotations) {
@@ -1235,23 +1234,12 @@ const App = {
     },
     
     resetGradingPanel() {
-        this.elements.essayTitleDisplay.innerHTML = `<span class="label">标题：</span><span class="value">未命名</span>`;
+        this.elements.essayTitleDisplay.innerHTML = `<span class="label">作文标题：</span><span class="value">未命名</span>`;
         this.elements.totalScore.textContent = '0';
-
-        // 重置分数圆环
-        const scoreRingProgress = document.getElementById('scoreRingProgress');
-        if (scoreRingProgress) {
-            scoreRingProgress.style.strokeDashoffset = 163;
-        }
-
+        this.elements.starRating.querySelectorAll('.star').forEach(s => s.classList.remove('filled'));
         this.elements.overallComment.innerHTML = '<p>提交作文后将显示综合评价</p>';
-
-        // 重置批注计数
-        const annotationCount = document.getElementById('annotationCount');
-        if (annotationCount) {
-            annotationCount.textContent = '0';
-        }
-
+        this.elements.summaryList.innerHTML = '<li class="summary-item"><span class="tag positive">✓ 优点</span><p>提交作文后将显示优点总结</p></li>';
+        this.elements.detailList.innerHTML = '<div class="empty-state"><p>提交作文后显示详细批改</p></div>';
         this.data = null;
     },
     
@@ -1596,35 +1584,29 @@ const App = {
     },
     
     renderSideComments() {
-        const sideCommentBody = this.elements.sideCommentBody;
-        if (!sideCommentBody) return;
-
         if (this.sideComments.length === 0) {
-            sideCommentBody.innerHTML = `
-                <div class="empty-state">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <p>选中文字后添加批注</p>
+            this.elements.sideCommentBody.innerHTML = `
+                <div class="side-comment-empty">
+                    <p>选中文字后点击评语添加批改</p>
                 </div>
             `;
             return;
         }
-
+        
         const colorLabels = {
             red: '纠错',
             yellow: '建议',
             green: '表扬'
         };
-
-        sideCommentBody.innerHTML = this.sideComments.map(item => `
+        
+        this.elements.sideCommentBody.innerHTML = this.sideComments.map(item => `
             <div class="side-comment-item ${item.color || 'red'}" data-id="${item.id}" onclick="App.highlightAnnotation(${item.id})">
                 <div class="comment-header">
                     <span class="comment-number ${item.color || 'red'}">${item.number}</span>
                     <span class="comment-color-label ${item.color || 'red'}">${colorLabels[item.color] || '纠错'}</span>
                     ${item.startIndex !== null && item.endIndex !== null && item.startIndex !== item.endIndex
                         ? `第 ${item.startIndex + 1}-${item.endIndex + 1} 字`
-                        : item.startIndex !== null
+                        : item.startIndex !== null 
                             ? `第 ${item.startIndex + 1} 字`
                             : `第 ${item.lineNum} 行`}
                 </div>
@@ -1632,12 +1614,6 @@ const App = {
                 <button class="delete-btn" onclick="event.stopPropagation(); App.deleteSideComment(${item.id})">×</button>
             </div>
         `).join('');
-
-        // 更新批注数量
-        const annotationCount = document.getElementById('annotationCount');
-        if (annotationCount) {
-            annotationCount.textContent = this.sideComments.length;
-        }
     },
     
     // 点击批注时高亮对应文字
@@ -1708,17 +1684,17 @@ const App = {
     // 显示分数详情
     displayScoreDetails(scores) {
         if (!scores) return;
-
-        this.elements.scoreContent.style.setProperty('--progress', scores.content + '%');
+        
+        this.elements.scoreContent.style.width = scores.content + '%';
         this.elements.scoreContentValue.textContent = scores.content;
-
-        this.elements.scoreLanguage.style.setProperty('--progress', scores.language + '%');
+        
+        this.elements.scoreLanguage.style.width = scores.language + '%';
         this.elements.scoreLanguageValue.textContent = scores.language;
-
-        this.elements.scoreStructure.style.setProperty('--progress', scores.structure + '%');
+        
+        this.elements.scoreStructure.style.width = scores.structure + '%';
         this.elements.scoreStructureValue.textContent = scores.structure;
-
-        this.elements.scoreStyle.style.setProperty('--progress', scores.style + '%');
+        
+        this.elements.scoreStyle.style.width = scores.style + '%';
         this.elements.scoreStyleValue.textContent = scores.style;
     },
     
