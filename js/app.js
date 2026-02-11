@@ -1422,6 +1422,20 @@ const App = {
         
         this.sideComments.push(annotation);
         
+        // 根据批注类型设置选中文字的背景色
+        if (color === 'yellow' || color === 'green') {
+            // 建议或表扬：改变背景色
+            for (let i = startIdx; i <= endIdx; i++) {
+                const cell = this.getCellAtIndex(i);
+                if (cell) {
+                    cell.classList.remove('selected');
+                    cell.classList.add('has-annotation');
+                    cell.classList.add(`highlight-${color}`);
+                }
+            }
+        }
+        // 纠错：保持默认红色选中背景不变
+        
         // 在文字上添加标注号
         if (annotation.startIndex !== null) {
             this.addAnnotationMarker(annotation);
@@ -1459,7 +1473,8 @@ const App = {
                 const cell = this.getCellAtIndex(i);
                 if (cell) {
                     cell.classList.add('has-annotation');
-                    if (annotation.color) {
+                    // 只有建议(yellow)和表扬(green)才改变背景色
+                    if (annotation.color && annotation.color !== 'red') {
                         cell.classList.add(`highlight-${annotation.color}`);
                     }
                 }
