@@ -256,7 +256,7 @@ body {
 
 /* Full Height Mode - show essay area with grading panel */
 .content-wrapper.full-height {
-    grid-template-rows: 1fr;
+    grid-template-rows: 1.3fr 1fr;
 }
 
 .essay-panel.full-height {
@@ -266,14 +266,14 @@ body {
 }
 
 .essay-panel.full-height .panel-body {
-    flex: 1;
+    flex: 1.3;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .essay-panel.full-height .text-grid-container {
-    flex: 1;
+    flex: 1.3;
     overflow: hidden;
 }
 
