@@ -477,7 +477,7 @@ const App = {
     },
     
     insertText(text) {
-        const contentArea = document.getElementById('contentArea');
+        const contentArea = document.getElementById('textGrid');
         contentArea.innerHTML = '';
         
         this.textGrid = [];
