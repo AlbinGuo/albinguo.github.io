@@ -99,6 +99,7 @@ const HistoryPage = {
             
             const preview = item.originalText.substring(0, 50) + (item.originalText.length > 50 ? '...' : '');
             const date = new Date(item.timestamp).toLocaleDateString();
+            const authorDisplay = item.author ? `👤 ${item.author} · ` : '';
             
             return `
                 <div class="history-item" data-id="${item.id}">
@@ -109,9 +110,8 @@ const HistoryPage = {
                     <div class="item-info">
                         <span class="item-type">${typeNames[item.type] || '未知'}</span>
                         <div class="item-meta">
-                            <span>📅 ${date}</span>
+                            <span>${authorDisplay}📅 ${date}</span>
                             <span>📝 ${item.stats.chars}字</span>
-                            <span>📄 ${item.stats.paragraphs}段</span>
                         </div>
                         <p class="item-preview">${preview}</p>
                     </div>
@@ -201,6 +201,8 @@ const HistoryPage = {
                           item.scores.overall >= 70 ? 'good' : 
                           item.scores.overall >= 60 ? 'average' : 'poor';
         
+        const authorDisplay = item.author ? `<p>👤 ${item.author}</p>` : '';
+        
         const body = document.getElementById('modalBody');
         body.innerHTML = `
             <div class="modal-score-row">
@@ -209,7 +211,9 @@ const HistoryPage = {
                     <span class="unit">综合</span>
                 </div>
                 <div class="modal-score-info">
-                    <h4>${typeNames[item.type] || '未知'}</h4>
+                    <h4>${item.title || '未命名'}</h4>
+                    <p>${typeNames[item.type] || '未知'}</p>
+                    ${authorDisplay}
                     <p>${new Date(item.timestamp).toLocaleString()}</p>
                 </div>
             </div>

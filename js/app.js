@@ -29,6 +29,7 @@ const App = {
         this.cacheElements();
         this.bindEvents();
         this.loadHistory();
+        this.loadMeta();
         this.initTextGrid();
         this.loadPaperType();
     },
@@ -39,6 +40,7 @@ const App = {
             historyPage: document.getElementById('historyPage'),
             helpPage: document.getElementById('helpPage'),
             essayTitle: document.getElementById('essayTitle'),
+            essayAuthor: document.getElementById('essayAuthor'),
             charCount: document.getElementById('charCount'),
             gradeBtn: document.getElementById('gradeBtn'),
             clearBtn: document.getElementById('clearBtn'),
@@ -103,6 +105,10 @@ const App = {
         
         this.elements.clearBtn.addEventListener('click', () => this.clearTextGrid());
         this.elements.gradeBtn.addEventListener('click', () => this.startGrading());
+        
+        // 标题和姓名输入框自动保存
+        this.elements.essayTitle.addEventListener('input', () => this.saveMeta());
+        this.elements.essayAuthor.addEventListener('input', () => this.saveMeta());
         
         // 纸张类型切换
         document.querySelectorAll('.paper-btn').forEach(btn => {
@@ -341,6 +347,25 @@ const App = {
             btn.classList.add('active');
             this.switchPaperType(savedType);
         }
+    },
+    
+    // 加载保存的标题和姓名
+    loadMeta() {
+        const savedTitle = localStorage.getItem('essayTitle');
+        const savedAuthor = localStorage.getItem('essayAuthor');
+        
+        if (savedTitle) {
+            this.elements.essayTitle.value = savedTitle;
+        }
+        if (savedAuthor) {
+            this.elements.essayAuthor.value = savedAuthor;
+        }
+    },
+    
+    // 保存标题和姓名
+    saveMeta() {
+        localStorage.setItem('essayTitle', this.elements.essayTitle.value);
+        localStorage.setItem('essayAuthor', this.elements.essayAuthor.value);
     },
     
     // 全屏显示
@@ -1033,7 +1058,9 @@ const App = {
     },
     
     clearTextGrid() {
-        this.elements.essayTitle.value = '';
+        // 保留标题和姓名，只清空内容
+        const savedTitle = this.elements.essayTitle.value;
+        const savedAuthor = this.elements.essayAuthor.value;
         this.sideComments = [];
         this.annotationCount = 0;
         this.lastClickedCell = null;
@@ -1049,6 +1076,10 @@ const App = {
         this.resetGradingPanel();
         this.clearHighlights();
         this.renderSideComments();
+        
+        // 恢复标题和姓名
+        this.elements.essayTitle.value = savedTitle;
+        this.elements.essayAuthor.value = savedAuthor;
     },
     
     onCellClick(index) {
@@ -1087,7 +1118,8 @@ const App = {
         
         const result = Grading.process(text, title);
         
-        // 添加旁批到结果
+        // 添加作者和旁批到结果
+        result.author = this.elements.essayAuthor.value.trim();
         result.sideComments = this.sideComments;
         
         this.data = result;
@@ -1100,9 +1132,11 @@ const App = {
     },
     
     displayResult(result) {
+        const authorDisplay = result.author ? `<span class="label">姓名：</span><span class="value">${result.author}</span>` : '';
         this.elements.essayTitleDisplay.innerHTML = `
             <span class="label">作文标题：</span>
             <span class="value">${result.title}</span>
+            ${authorDisplay}
         `;
         
         // 显示分数详情
@@ -1272,11 +1306,16 @@ const App = {
     loadRecord(record) {
         this.clearTextGrid();
         
-        // 设置标题
+        // 设置标题和姓名
         const titleCell = document.getElementById('titleCell');
         if (record.title && record.title !== '未命名') {
             titleCell.textContent = record.title;
             this.elements.essayTitle.value = record.title;
+        }
+        
+        // 设置作者姓名
+        if (record.author) {
+            this.elements.essayAuthor.value = record.author;
         }
         
         // 插入内容
