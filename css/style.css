@@ -391,12 +391,21 @@ body {
     background: rgba(16, 185, 129, 0.15);
     border-color: #059669;
 }
-}
 
-/* Selected range */
+/* Selected range - should not override has-annotation colors */
 .char-cell.selected {
     background: rgba(197, 48, 48, 0.2);
     border-color: #c53030;
+}
+
+.char-cell.selected.has-annotation.highlight-yellow {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: #d97706;
+}
+
+.char-cell.selected.has-annotation.highlight-green {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #059669;
 }
 
 /* ========== Tian Grid Style - 田字格 ========== */
