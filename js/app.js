@@ -12,34 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     App.init();
 });
 
-window.testPaste = function(text) {
-    if (!text) {
-        text = '这是一段测试作文内容。\n点击开始批改按钮可以查看批改结果。';
-    }
-    App.insertText(text);
-    console.log('Test paste completed!');
-};
-
-window.doPaste = async function() {
-    try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-            console.log('Clipboard paste:', text.substring(0, 50) + '...');
-            App.insertText(text);
-        } else {
-            console.log('No text in clipboard');
-            alert('剪贴板中没有文本，请先复制一些文本');
-        }
-    } catch (err) {
-        console.log('Clipboard API failed:', err);
-        // Fallback: use prompt
-        const text = prompt('请粘贴文本到下方:');
-        if (text) {
-            App.insertText(text);
-        }
-    }
-};
-
 const App = {
     data: null,
     textGrid: [],
@@ -299,48 +271,19 @@ const App = {
         // 全局粘贴事件
         document.addEventListener('paste', (e) => {
             const active = document.activeElement;
-            const activeTag = active?.tagName;
-            const activeId = active?.id;
-            const activeClass = active?.className;
-
-            const inCharCell = active?.closest?.('.char-cell');
-            const inTitleInput = active?.closest?.('#essayTitle');
-            const inAuthorInput = active?.closest?.('#essayAuthor');
-
-            console.log('Paste event:', { activeTag, activeId, inCharCell: !!inCharCell, inTitleInput: !!inTitleInput, inAuthorInput: !!inAuthorInput });
-
-            if (inCharCell || inTitleInput || inAuthorInput) {
-                console.log('Paste blocked - inside input');
-                return;
-            }
-
+            const inCharCell = active.closest('.char-cell');
+            const inTitleCell = active.closest('#titleCell');
+            const inAuthorCell = active.closest('#authorCell');
+            
+            if (inCharCell || inTitleCell || inAuthorCell) return;
+            
             e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData)?.getData('text');
+            const text = (e.clipboardData || window.clipboardData).getData('text');
             if (text) {
-                console.log('Processing paste:', text.substring(0, 50) + '...');
-                setTimeout(() => {
-                    this.insertText(text);
-                }, 10);
-            } else {
-                console.log('No text in clipboard');
+                this.insertText(text);
             }
         });
-
-        // 直接在 textGridContainer 上监听粘贴事件
-        const textGridContainer = document.getElementById('textGridContainer');
-        if (textGridContainer) {
-            textGridContainer.addEventListener('paste', (e) => {
-                console.log('paste event captured on textGridContainer');
-                e.preventDefault();
-                e.stopPropagation();
-                const text = (e.clipboardData || window.clipboardData)?.getData('text');
-                if (text) {
-                    console.log('Inserting text:', text.substring(0, 30) + '...');
-                    this.insertText(text);
-                }
-            });
-        }
-
+        
         // 全局鼠标释放停止选择
         document.addEventListener('mouseup', () => {
             this.isSelecting = false;
@@ -473,91 +416,123 @@ const App = {
     initTextGrid() {
         this.textGrid = [];
         this.charIndexToPosition = {};
-
+        
         const container = this.elements.textGrid;
-        if (!container) {
-            console.error('textGrid container not found!');
-            return;
-        }
-
+        
+        container.innerHTML = `
+            <div class="writing-paper" id="writingPaper">
+                <div class="title-area" id="titleArea">
+                    <div class="title-row">
+                        <div class="title-cell" id="titleCell">
+                            <span class="title-placeholder">在此输入标题</span>
+                        </div>
+                    </div>
+                    <div class="author-row">
+                        <span class="author-label">姓名：</span>
+                        <div class="author-cell" id="authorCell" contenteditable="true"></div>
+                    </div>
+                </div>
+                <div class="content-area" id="contentArea"></div>
+            </div>
+        `;
+        
+        const contentArea = document.getElementById('contentArea');
+        const titleCell = document.getElementById('titleCell');
+        
+        // 点击内容区域聚焦
+        contentArea.addEventListener('click', (e) => {
+            if (e.target === contentArea || 
+                e.target.classList.contains('char-row') ||
+                e.target.classList.contains('line-number')) {
+                const firstCell = contentArea.querySelector('.char-cell');
+                if (firstCell) this.focusCell(firstCell);
+            }
+        });
+        
+        titleCell.addEventListener('click', () => {
+            const placeholder = titleCell.querySelector('.title-placeholder');
+            if (placeholder) {
+                placeholder.remove();
+                titleCell.focus();
+            }
+        });
+        
+        titleCell.addEventListener('input', () => {
+            this.elements.essayTitle.value = titleCell.textContent.trim();
+        });
+        
         this.showPlaceholder();
     },
-
+    
     showPlaceholder() {
-        const textGrid = document.getElementById('textGrid');
-        if (!textGrid) return;
-
+        const contentArea = document.getElementById('contentArea');
         if (this.textGrid.length === 0) {
-            textGrid.innerHTML = `
-                <div class="grid-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    <p>输入或粘贴作文内容</p>
-                    <span>每个格子一个字</span>
-                    <button class="paste-btn" onclick="doPaste()" style="margin-top: 12px; padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer;">点击粘贴</button>
+            contentArea.innerHTML = `
+                <div class="grid-placeholder" style="padding: 60px 20px;">
+                    <p style="font-size: 16px; color: #999;">📝 在此输入作文内容</p>
+                    <p style="font-size: 12px; color: #ccc; margin-top: 8px;">支持直接粘贴文本，自动分格</p>
                 </div>
             `;
         }
     },
-
+    
     insertText(text) {
-        const textGrid = document.getElementById('textGrid');
-        if (!textGrid) {
-            console.error('textGrid not found!');
-            return;
-        }
-        console.log('insertText called with:', text.substring(0, 50) + '...');
-
-        textGrid.innerHTML = '';
-
+        const contentArea = document.getElementById('textGrid');
+        contentArea.innerHTML = '';
+        
         this.textGrid = [];
         this.charIndexToPosition = {};
-
+        
         const lines = text.split('\n');
         let lineNumber = 1;
         let currentRowChars = [];
         let globalIndex = 0;
-
+        
         lines.forEach((line, lineIndex) => {
+            // 段落间隔
             if (lineIndex > 0) {
+                // 先渲染当前行
                 if (currentRowChars.length > 0) {
-                    this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+                    this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
                     currentRowChars = [];
                 }
-
+                
+                // 添加段落分隔
                 const gap = document.createElement('div');
                 gap.className = 'paragraph-gap';
                 gap.dataset.para = '第' + this.toChinese(lineIndex + 1) + '段';
-                textGrid.appendChild(gap);
+                contentArea.appendChild(gap);
             }
-
+            
             const chars = line.split('');
-
+            
             chars.forEach((char) => {
                 currentRowChars.push(char);
                 this.textGrid.push(char);
                 globalIndex++;
-
+                
+                // 如果满一行，渲染这行
                 if (currentRowChars.length === PAPER_CONFIG.CHARS_PER_LINE) {
-                    this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+                    this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
                     currentRowChars = [];
                 }
             });
         });
-
+        
+        // 渲染最后一行
         if (currentRowChars.length > 0) {
-            this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+            this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
         }
-
-        this.addEmptyRow(textGrid, lineNumber);
-
-        const firstCell = textGrid.querySelector('.char-cell');
+        
+        // 添加空行供继续输入
+        this.addEmptyRow(contentArea, lineNumber);
+        
+        // 聚焦到第一个格子
+        const firstCell = contentArea.querySelector('.char-cell');
         if (firstCell) {
             this.focusCell(firstCell);
         }
-
+        
         this.updateCharCount();
         this.updateLineNumbers();
     },
@@ -1087,18 +1062,26 @@ const App = {
     },
     
     clearTextGrid() {
+        // 保留标题和姓名，只清空内容
         const savedTitle = this.elements.essayTitle.value;
         const savedAuthor = this.elements.essayAuthor.value;
         this.sideComments = [];
         this.annotationCount = 0;
         this.lastClickedCell = null;
         this.clearSelection();
-
+        
+        const titleCell = document.getElementById('titleCell');
+        const authorCell = document.getElementById('authorCell');
+        
+        titleCell.innerHTML = '<span class="title-placeholder">在此输入标题</span>';
+        authorCell.textContent = '';
+        
         this.initTextGrid();
         this.resetGradingPanel();
         this.clearHighlights();
         this.renderSideComments();
-
+        
+        // 恢复标题和姓名
         this.elements.essayTitle.value = savedTitle;
         this.elements.essayAuthor.value = savedAuthor;
     },
@@ -1335,15 +1318,20 @@ const App = {
     
     loadRecord(record) {
         this.clearTextGrid();
-
+        
+        // 设置标题和姓名
+        const titleCell = document.getElementById('titleCell');
         if (record.title && record.title !== '未命名') {
+            titleCell.textContent = record.title;
             this.elements.essayTitle.value = record.title;
         }
-
+        
+        // 设置作者姓名
         if (record.author) {
             this.elements.essayAuthor.value = record.author;
         }
-
+        
+        // 插入内容
         this.insertText(record.originalText);
         
         // 加载旁批
