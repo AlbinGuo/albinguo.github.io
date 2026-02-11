@@ -369,10 +369,12 @@ body {
 
 .annotation-marker.yellow {
     background: #d97706;
+    color: white;
 }
 
 .annotation-marker.green {
     background: #059669;
+    color: white;
 }
 
 /* Character cell with annotation highlight */
@@ -634,10 +636,12 @@ body {
 
 .tian-grid-mode .text-grid.tian-grid .annotation-marker.yellow {
     background: #d97706;
+    color: white;
 }
 
 .tian-grid-mode .text-grid.tian-grid .annotation-marker.green {
     background: #059669;
+    color: white;
 }
 
 .tian-grid-mode .text-grid.tian-grid .paragraph-gap {
@@ -938,10 +942,12 @@ body {
 
 .side-comment-item .comment-number.yellow {
     background: #d97706;
+    color: white;
 }
 
 .side-comment-item .comment-number.green {
     background: #059669;
+    color: white;
 }
 
 .side-comment-item .comment-color-label {
@@ -1094,6 +1100,16 @@ body {
 
 .annotation-marker:hover {
     transform: scale(1.2);
+}
+
+.annotation-marker.yellow {
+    background: #d97706;
+    color: white;
+}
+
+.annotation-marker.green {
+    background: #059669;
+    color: white;
 }
 
 /* Character cell with annotation */
