@@ -106,16 +106,13 @@ body {
 /* Grading Page */
 .grading-page {
     height: calc(100vh - 80px);
-    display: flex;
-    flex-direction: column;
 }
 
 .content-wrapper {
     display: grid;
-    grid-template-columns: 1fr 280px 400px;
+    grid-template-columns: 1fr 260px 400px;
     gap: 1rem;
     height: 100%;
-    overflow: hidden;
 }
 
 /* Essay Panel */
@@ -127,7 +124,6 @@ body {
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
     overflow: hidden;
-    height: 100%;
 }
 
 .panel-header {
@@ -211,7 +207,8 @@ body {
 
 .text-grid-container {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: auto;
     background: #fff;
     border-radius: 4px;
     border: 1px solid #ddd;
@@ -219,7 +216,7 @@ body {
 
 .text-grid {
     padding: 15px 20px;
-    height: 100%;
+    min-height: 100%;
     font-family: "STKaiti", "KaiTi", "楷体", serif;
 }
 
@@ -888,7 +885,7 @@ body {
 
 .side-comment-panel .panel-body {
     padding: 0.75rem;
-    overflow: hidden;
+    overflow-y: auto;
     flex: 1;
 }
 
@@ -1471,7 +1468,7 @@ body {
 
 .summary-panel .panel-body {
     padding: 0.75rem 1rem;
-    overflow: hidden;
+    overflow-y: auto;
     flex: 1;
 }
 
@@ -1548,7 +1545,7 @@ body {
 
 .detail-panel .panel-body {
     padding: 0.75rem;
-    overflow: hidden;
+    overflow-y: auto;
     flex: 1;
 }
 
