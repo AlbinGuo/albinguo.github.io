@@ -153,6 +153,28 @@ const ResultPage = {
         const overallComment = document.getElementById('overallComment');
         if (overallComment) overallComment.textContent = comments.overall;
         
+        // 分项评分
+        const contentScoreEl = document.getElementById('contentScore');
+        const structureScoreEl = document.getElementById('structureScore');
+        const languageScoreEl = document.getElementById('languageScore');
+        const styleScoreEl = document.getElementById('styleScore');
+        
+        if (contentScoreEl) contentScoreEl.textContent = scores.content;
+        if (structureScoreEl) structureScoreEl.textContent = scores.structure;
+        if (languageScoreEl) languageScoreEl.textContent = scores.language;
+        if (styleScoreEl) styleScoreEl.textContent = scores.style;
+        
+        // 进度条
+        const contentBar = document.getElementById('contentBar');
+        const structureBar = document.getElementById('structureBar');
+        const languageBar = document.getElementById('languageBar');
+        const styleBar = document.getElementById('styleBar');
+        
+        if (contentBar) contentBar.style.width = scores.content + '%';
+        if (structureBar) structureBar.style.width = scores.structure + '%';
+        if (languageBar) languageBar.style.width = scores.language + '%';
+        if (styleBar) styleBar.style.width = scores.style + '%';
+        
         // 统计
         const charCount = document.getElementById('charCount');
         const paraCount = document.getElementById('paraCount');
@@ -198,6 +220,27 @@ const ResultPage = {
             console.log('原文渲染完成');
         } else if (essayEl) {
             essayEl.innerHTML = '<p class="placeholder">暂无内容</p>';
+        }
+        
+        // 批注列表
+        const sugEl = document.getElementById('suggestionsList');
+        if (sugEl) {
+            if (sideComments && sideComments.length > 0) {
+                sugEl.innerHTML = sideComments.map(item => `
+                    <li class="annotation-item annotation-${item.color || 'red'}">
+                        <div class="annotation-header">
+                            <span class="annotation-number">${item.number}</span>
+                            <span class="annotation-label">${item.color === 'yellow' ? '建议' : item.color === 'green' ? '表扬' : '纠错'}</span>
+                            ${item.startIndex !== null ? `<span class="annotation-position">第 ${item.startIndex + 1} 字</span>` : ''}
+                        </div>
+                        <div class="annotation-content">${item.comment}</div>
+                    </li>
+                `).join('');
+            } else if (suggestions && suggestions.length > 0) {
+                sugEl.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+            } else {
+                sugEl.innerHTML = '<li class="placeholder">暂无批注</li>';
+            }
         }
         
         console.log('渲染完成');
