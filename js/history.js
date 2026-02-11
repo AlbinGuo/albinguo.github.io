@@ -108,7 +108,7 @@ const HistoryPage = {
                         <span class="score-label">分</span>
                     </div>
                     <div class="item-info">
-                        <span class="item-type">${typeNames[item.type] || '未知'}</span>
+                        <span class="item-type">${item.title || '未命名'}</span>
                         <div class="item-meta">
                             <span>${authorDisplay}📅 ${date}</span>
                             <span>📝 ${item.stats.chars}字</span>
