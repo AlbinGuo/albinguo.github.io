@@ -11,146 +11,224 @@
     <div class="app-container">
         <header class="header">
             <div class="logo">
-                <span class="logo-icon">✏</span>
+                <svg class="logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <path d="M2 2l7.586 7.586"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
                 <span class="logo-text">智能作文批改</span>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav-link">批改</a>
-                <a href="history.html" class="nav-link">历史记录</a>
+                <a href="index.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    批改
+                </a>
+                <a href="history.html" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    历史记录
+                </a>
             </nav>
         </header>
 
-        <main class="main result-main">
-            <!-- 左侧：结果展示 -->
-            <section class="result-section">
-                <!-- 总分卡片 -->
-                <div class="score-card">
-                    <div class="score-circle" id="scoreCircle">
-                        <span class="score-value" id="scoreValue">0</span>
-                        <span class="score-unit">分</span>
-                    </div>
-                    <div class="score-info">
-                        <h2 id="scoreLevel">优秀</h2>
-                        <p id="overallComment">这是一篇优秀的作文</p>
-                    </div>
-                    <div class="score-stats">
-                        <div class="stat">
-                            <span class="stat-value" id="charCount">0</span>
-                            <span class="stat-label">字数</span>
+        <main class="main-content result-page">
+            <div class="result-layout">
+                <section class="essay-section">
+                    <div class="essay-card">
+                        <div class="essay-header">
+                            <div class="essay-meta-row">
+                                <h1 class="essay-title" id="essayTitleDisplay">未命名</h1>
+                                <div class="essay-info" id="essayHeaderInfo">
+                                    <span class="essay-info-item">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        <span class="meta-text" id="essayAuthor"></span>
+                                    </span>
+                                    <span class="essay-info-divider"></span>
+                                    <span class="essay-info-item">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <span class="meta-text" id="essayDate"></span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat">
-                            <span class="stat-value" id="paraCount">0</span>
-                            <span class="stat-label">段落</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value" id="errorCount">0</span>
-                            <span class="stat-label">问题</span>
+                        <div class="essay-body" id="essayContent">
+                            <div class="empty-placeholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p>请从历史记录中选择一条批改结果查看</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- 分项评分 -->
-                <div class="card">
-                    <h3>分项评分</h3>
-                    <div class="score-bars">
-                        <div class="score-bar-item">
-                            <div class="bar-label">
-                                <span>内容</span>
-                                <span class="bar-value" id="contentScore">0</span>
+                <aside class="result-sidebar">
+                    <div class="sidebar-section score-section">
+                        <div class="score-card">
+                            <div class="score-ring-wrapper">
+                                <div class="score-ring" id="scoreRing">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle class="score-ring-bg" cx="60" cy="60" r="52"/>
+                                        <circle class="score-ring-progress" cx="60" cy="60" r="52" id="scoreRingProgress"/>
+                                    </svg>
+                                    <div class="score-ring-content">
+                                        <span class="score-number" id="scoreValue">0</span>
+                                        <span class="score-unit">分</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="bar-track">
-                                <div class="bar-fill" id="contentBar" style="--width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="score-bar-item">
-                            <div class="bar-label">
-                                <span>结构</span>
-                                <span class="bar-value" id="structureScore">0</span>
-                            </div>
-                            <div class="bar-track">
-                                <div class="bar-fill" id="structureBar" style="--width: 0%"></div>
+                            <div class="score-details">
+                                <div class="score-level" id="scoreLevel">优秀</div>
+                                <p class="score-comment" id="overallComment">暂无评语</p>
                             </div>
                         </div>
-                        <div class="score-bar-item">
-                            <div class="bar-label">
-                                <span>语言</span>
-                                <span class="bar-value" id="languageScore">0</span>
+                        <div class="score-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="charCount">0</span>
+                                    <span class="stat-label">字数</span>
+                                </div>
                             </div>
-                            <div class="bar-track">
-                                <div class="bar-fill" id="languageBar" style="--width: 0%"></div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="paraCount">0</span>
+                                    <span class="stat-label">段落</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="score-bar-item">
-                            <div class="bar-label">
-                                <span>文采</span>
-                                <span class="bar-value" id="styleScore">0</span>
-                            </div>
-                            <div class="bar-track">
-                                <div class="bar-fill" id="styleBar" style="--width: 0%"></div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="errorCount">0</span>
+                                    <span class="stat-label">批注</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 作文原文 -->
-                <div class="card">
-                    <h3>原文</h3>
-                    <div class="essay-content" id="essayContent">
-                        <p class="placeholder">暂无内容</p>
+                    <div class="sidebar-section">
+                        <div class="section-header">
+                            <h3>评分详情</h3>
+                        </div>
+                        <div class="score-breakdown">
+                            <div class="score-row">
+                                <div class="score-row-header">
+                                    <span class="score-row-label">内容</span>
+                                    <span class="score-row-value" id="contentScore">0</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="contentBar" style="--progress: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-row">
+                                <div class="score-row-header">
+                                    <span class="score-row-label">结构</span>
+                                    <span class="score-row-value" id="structureScore">0</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="structureBar" style="--progress: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-row">
+                                <div class="score-row-header">
+                                    <span class="score-row-label">语言</span>
+                                    <span class="score-row-value" id="languageScore">0</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="languageBar" style="--progress: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-row">
+                                <div class="score-row-header">
+                                    <span class="score-row-label">文采</span>
+                                    <span class="score-row-value" id="styleScore">0</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="styleBar" style="--progress: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 修改建议 -->
-                <div class="card">
-                    <h3>修改建议</h3>
-                    <ul class="suggestions-list" id="suggestionsList">
-                        <li class="placeholder">暂无建议</li>
-                    </ul>
-                </div>
-            </section>
+                    <div class="sidebar-section">
+                        <div class="section-header">
+                            <h3>批注标注</h3>
+                            <span class="section-badge" id="annotationCount">0</span>
+                        </div>
+                        <ul class="annotation-list" id="suggestionsList">
+                            <li class="empty-state">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                </svg>
+                                <p>暂无批注</p>
+                            </li>
+                        </ul>
+                    </div>
 
-            <!-- 右侧：操作区 -->
-            <aside class="aside-section">
-                <div class="card">
-                    <h3>操作</h3>
-                    <div class="action-buttons">
-                        <button class="btn-primary" id="newGradingBtn">
-                            <span>📝</span>
+                    <div class="sidebar-section action-section">
+                        <button class="action-btn primary" id="newGradingBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
                             新建批改
                         </button>
-                        <button class="btn-secondary" id="downloadBtn">
-                            <span>📥</span>
+                        <button class="action-btn secondary" id="downloadBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
                             下载结果
                         </button>
-                        <button class="btn-secondary" id="saveBtn">
-                            <span>⭐</span>
-                            保存记录
-                        </button>
                     </div>
-                </div>
-
-                <!-- 错误详情 -->
-                <div class="card" id="errorCard" hidden>
-                    <h3>问题详情</h3>
-                    <ul class="error-list" id="errorList"></ul>
-                </div>
-
-                <!-- 评语 -->
-                <div class="card">
-                    <h3>评语</h3>
-                    <div class="comments-box" id="commentsBox">
-                        <p class="placeholder">暂无评语</p>
-                    </div>
-                </div>
-
-                <div class="card notice">
-                    <p><strong>声明：</strong>本结果仅供参考，建议结合教师专业意见使用。</p>
-                </div>
-            </aside>
+                </aside>
+            </div>
         </main>
 
         <footer class="footer">
-            <p>© 2025 智能作文批改助手</p>
+            <p>© 2025 智能作文批改助手 · 让批改更高效</p>
         </footer>
     </div>
 

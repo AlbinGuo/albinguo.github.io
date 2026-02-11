@@ -50,24 +50,29 @@ const ResultPage = {
     },
     
     showEmpty() {
-        // 只在原文区域显示空状态
         const essayEl = document.getElementById('essayContent');
-        const headerInfo = document.getElementById('essayHeaderInfo');
-        
-        if (headerInfo) {
-            headerInfo.innerHTML = '<div class="meta">暂无数据</div>';
-        }
+        const titleEl = document.getElementById('essayTitleDisplay');
+        const authorEl = document.getElementById('essayAuthor');
+        const dateEl = document.getElementById('essayDate');
+
+        if (titleEl) titleEl.textContent = '暂无数据';
+        if (authorEl) authorEl.parentElement.style.display = 'none';
+        if (dateEl) dateEl.parentElement.style.display = 'none';
+
         if (essayEl) {
-            essayEl.innerHTML = '<p class="placeholder">请从历史记录中选择一条批改结果查看</p>';
+            essayEl.innerHTML = `
+                <div class="empty-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <p>请从历史记录中选择一条批改结果查看</p>
+                </div>
+            `;
         }
-        
-        // 显示调试信息
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('id');
-        const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
-        console.log('URL参数ID:', id);
-        console.log('历史记录数量:', history.length);
-        console.log('历史记录IDs:', history.map(h => h.id));
     },
     
     loadDemo() {
@@ -110,79 +115,102 @@ const ResultPage = {
         console.log('title:', this.data.title);
         console.log('author:', this.data.author);
         console.log('sideComments:', this.data.sideComments);
-        
+
         const { scores, stats, comments, suggestions, originalText, title, author, sideComments } = this.data;
         const errors = this.data.errors || [];
-        
+
         // 显示标题和作者
-        const headerInfo = document.getElementById('essayHeaderInfo');
-        if (headerInfo) {
-            const date = new Date(this.data.timestamp).toLocaleDateString();
-            headerInfo.innerHTML = `
-                <div class="title">${title || '未命名'}</div>
-                <div class="meta">
-                    ${author ? `👤 ${author} · ` : ''}📅 ${date}
-                </div>
-            `;
+        const titleEl = document.getElementById('essayTitleDisplay');
+        const authorEl = document.getElementById('essayAuthor');
+        const dateEl = document.getElementById('essayDate');
+
+        if (titleEl) titleEl.textContent = title || '未命名';
+        if (dateEl) dateEl.textContent = new Date(this.data.timestamp).toLocaleDateString();
+
+        if (authorEl && author) {
+            authorEl.textContent = author;
+            authorEl.parentElement.style.display = 'flex';
+        } else if (authorEl) {
+            authorEl.parentElement.style.display = 'none';
         }
-        
-        // 总分
+        if (dateEl) dateEl.parentElement.style.display = 'flex';
+
+        // 总分圆环
         const scoreValueEl = document.getElementById('scoreValue');
+        const scoreRing = document.getElementById('scoreRing');
+        const scoreRingProgress = document.getElementById('scoreRingProgress');
+
         if (scoreValueEl) {
             scoreValueEl.textContent = scores.overall;
         }
-        
-        // 等级
-        const level = document.getElementById('scoreLevel');
-        const circle = document.getElementById('scoreCircle');
-        
-        if (scores.overall >= 85) {
-            if (level) level.textContent = '优秀';
-            if (circle) circle.className = 'score-circle excellent';
-        } else if (scores.overall >= 70) {
-            if (level) level.textContent = '良好';
-            if (circle) circle.className = 'score-circle good';
-        } else if (scores.overall >= 60) {
-            if (level) level.textContent = '合格';
-            if (circle) circle.className = 'score-circle average';
-        } else {
-            if (level) level.textContent = '待提高';
-            if (circle) circle.className = 'score-circle poor';
+
+        // 计算圆环进度 (327是圆周长)
+        const circumference = 327;
+        const offset = circumference - (scores.overall / 100 * circumference);
+
+        if (scoreRingProgress) {
+            scoreRingProgress.style.strokeDashoffset = offset;
         }
-        
+
+        const level = document.getElementById('scoreLevel');
+
+        if (scoreRing) {
+            scoreRing.classList.remove('excellent', 'good', 'average', 'poor');
+            if (scores.overall >= 85) {
+                if (level) level.textContent = '优秀';
+                scoreRing.classList.add('excellent');
+            } else if (scores.overall >= 70) {
+                if (level) level.textContent = '良好';
+                scoreRing.classList.add('good');
+            } else if (scores.overall >= 60) {
+                if (level) level.textContent = '合格';
+                scoreRing.classList.add('average');
+            } else {
+                if (level) level.textContent = '待提高';
+                scoreRing.classList.add('poor');
+            }
+        }
+
         const overallComment = document.getElementById('overallComment');
-        if (overallComment) overallComment.textContent = comments.overall;
+        if (overallComment) overallComment.textContent = comments.overall || '暂无评语';
         
         // 分项评分
         const contentScoreEl = document.getElementById('contentScore');
         const structureScoreEl = document.getElementById('structureScore');
         const languageScoreEl = document.getElementById('languageScore');
         const styleScoreEl = document.getElementById('styleScore');
-        
+
         if (contentScoreEl) contentScoreEl.textContent = scores.content;
         if (structureScoreEl) structureScoreEl.textContent = scores.structure;
         if (languageScoreEl) languageScoreEl.textContent = scores.language;
         if (styleScoreEl) styleScoreEl.textContent = scores.style;
-        
+
         // 进度条
         const contentBar = document.getElementById('contentBar');
         const structureBar = document.getElementById('structureBar');
         const languageBar = document.getElementById('languageBar');
         const styleBar = document.getElementById('styleBar');
-        
-        if (contentBar) contentBar.style.width = scores.content + '%';
-        if (structureBar) structureBar.style.width = scores.structure + '%';
-        if (languageBar) languageBar.style.width = scores.language + '%';
-        if (styleBar) styleBar.style.width = scores.style + '%';
-        
+
+        if (contentBar) contentBar.style.setProperty('--progress', scores.content + '%');
+        if (structureBar) structureBar.style.setProperty('--progress', scores.structure + '%');
+        if (languageBar) languageBar.style.setProperty('--progress', scores.language + '%');
+        if (styleBar) styleBar.style.setProperty('--progress', scores.style + '%');
+
         // 统计
         const charCount = document.getElementById('charCount');
         const paraCount = document.getElementById('paraCount');
         const errorCount = document.getElementById('errorCount');
-        
+
         if (charCount) charCount.textContent = stats.chars;
         if (paraCount) paraCount.textContent = stats.paragraphs;
         if (errorCount) errorCount.textContent = errors.length;
+
+        // 批注数量
+        const annotationCount = document.getElementById('annotationCount');
+        if (annotationCount) {
+            const count = sideComments ? sideComments.length : 0;
+            annotationCount.textContent = count;
+        }
         
         // 原文和批注
         const essayEl = document.getElementById('essayContent');
@@ -230,7 +258,7 @@ const ResultPage = {
         if (sugEl) {
             if (sideComments && sideComments.length > 0) {
                 sugEl.innerHTML = sideComments.map(item => `
-                    <li class="annotation-item annotation-${item.color || 'red'}">
+                    <li class="annotation-item ${item.color || 'red'}">
                         <div class="annotation-header">
                             <span class="annotation-number">${item.number}</span>
                             <span class="annotation-label">${item.color === 'yellow' ? '建议' : item.color === 'green' ? '表扬' : '纠错'}</span>
@@ -240,12 +268,30 @@ const ResultPage = {
                     </li>
                 `).join('');
             } else if (suggestions && suggestions.length > 0) {
-                sugEl.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+                sugEl.innerHTML = suggestions.map((s, i) => `
+                    <li class="annotation-item red">
+                        <div class="annotation-header">
+                            <span class="annotation-number">${i + 1}</span>
+                            <span class="annotation-label">建议</span>
+                        </div>
+                        <div class="annotation-content">${s}</div>
+                    </li>
+                `).join('');
             } else {
-                sugEl.innerHTML = '<li class="placeholder">暂无批注</li>';
+                sugEl.innerHTML = `
+                    <li class="empty-state">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                        <p>暂无批注</p>
+                    </li>
+                `;
             }
         }
-        
+
         console.log('渲染完成');
     },
     
