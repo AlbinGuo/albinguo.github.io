@@ -394,6 +394,17 @@ body {
     border-color: #059669;
 }
 
+/* Highlight class for annotations (without has-annotation) */
+.char-cell.highlight-yellow {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #d97706;
+}
+
+.char-cell.highlight-green {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #059669;
+}
+
 /* Selected range - only apply red when no annotation */
 .char-cell.selected:not(.has-annotation) {
     background: rgba(197, 48, 48, 0.2);
@@ -646,6 +657,17 @@ body {
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.selected.has-annotation.highlight-green {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #059669;
+}
+
+/* Highlight class for Tian grid */
+.tian-grid-mode .text-grid.tian-grid .char-cell.highlight-yellow {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #d97706;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.highlight-green {
     background: rgba(16, 185, 129, 0.15);
     border-color: #059669;
 }
