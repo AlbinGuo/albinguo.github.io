@@ -254,9 +254,22 @@ body {
     border-top: 1px solid var(--gray-200);
 }
 
-/* Full Height Mode */
+/* Full Height Mode - show essay area with grading panel */
+.content-wrapper.full-height {
+    grid-template-rows: 1fr;
+}
+
 .essay-panel.full-height {
     height: 100% !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.essay-panel.full-height .panel-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .essay-panel.full-height .text-grid-container {

@@ -365,13 +365,16 @@ const App = {
     // 100%高度显示
     toggleFullHeight() {
         const essayPanel = document.querySelector('.essay-panel');
+        const contentWrapper = document.querySelector('.content-wrapper');
         const btn = this.elements.fullHeightBtn;
         
         if (essayPanel.classList.contains('full-height')) {
             essayPanel.classList.remove('full-height');
+            contentWrapper.classList.remove('full-height');
             btn.classList.remove('active');
         } else {
             essayPanel.classList.add('full-height');
+            contentWrapper.classList.add('full-height');
             btn.classList.add('active');
             // 退出全屏模式
             essayPanel.classList.remove('fullscreen');
