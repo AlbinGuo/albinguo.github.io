@@ -20,6 +20,26 @@ window.testPaste = function(text) {
     console.log('Test paste completed!');
 };
 
+window.doPaste = async function() {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            console.log('Clipboard paste:', text.substring(0, 50) + '...');
+            App.insertText(text);
+        } else {
+            console.log('No text in clipboard');
+            alert('剪贴板中没有文本，请先复制一些文本');
+        }
+    } catch (err) {
+        console.log('Clipboard API failed:', err);
+        // Fallback: use prompt
+        const text = prompt('请粘贴文本到下方:');
+        if (text) {
+            App.insertText(text);
+        }
+    }
+};
+
 const App = {
     data: null,
     textGrid: [],
@@ -305,7 +325,22 @@ const App = {
                 console.log('No text in clipboard');
             }
         });
-        
+
+        // 直接在 textGridContainer 上监听粘贴事件
+        const textGridContainer = document.getElementById('textGridContainer');
+        if (textGridContainer) {
+            textGridContainer.addEventListener('paste', (e) => {
+                console.log('paste event captured on textGridContainer');
+                e.preventDefault();
+                e.stopPropagation();
+                const text = (e.clipboardData || window.clipboardData)?.getData('text');
+                if (text) {
+                    console.log('Inserting text:', text.substring(0, 30) + '...');
+                    this.insertText(text);
+                }
+            });
+        }
+
         // 全局鼠标释放停止选择
         document.addEventListener('mouseup', () => {
             this.isSelecting = false;
@@ -445,107 +480,84 @@ const App = {
             return;
         }
 
-        container.innerHTML = '';
-
-        const contentArea = document.createElement('div');
-        contentArea.id = 'contentArea';
-        contentArea.className = 'content-area';
-        container.appendChild(contentArea);
-
         this.showPlaceholder();
     },
 
     showPlaceholder() {
-        const contentArea = document.getElementById('contentArea');
-        if (!contentArea) return;
+        const textGrid = document.getElementById('textGrid');
+        if (!textGrid) return;
 
         if (this.textGrid.length === 0) {
-            contentArea.innerHTML = `
-                <div class="grid-placeholder" style="padding: 60px 20px;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;">
+            textGrid.innerHTML = `
+                <div class="grid-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
-                    <p style="font-size: 16px; color: #666; margin: 0 0 8px 0;">输入或粘贴作文内容</p>
-                    <p style="font-size: 12px; color: #999; margin: 0;">支持直接粘贴文本，自动分格</p>
-                </div>
-            `;
-                    <p style="font-size: 16px; color: #999;">📝 在此输入作文内容</p>
-                    <p style="font-size: 12px; color: #ccc; margin-top: 8px;">支持直接粘贴文本，自动分格</p>
+                    <p>输入或粘贴作文内容</p>
+                    <span>每个格子一个字</span>
+                    <button class="paste-btn" onclick="doPaste()" style="margin-top: 12px; padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer;">点击粘贴</button>
                 </div>
             `;
         }
     },
-    
+
     insertText(text) {
-        let contentArea = document.getElementById('contentArea');
         const textGrid = document.getElementById('textGrid');
-
-        if (!contentArea && textGrid) {
-            contentArea = textGrid;
-        }
-
-        if (!contentArea) {
-            console.error('Content area not found!');
-            console.log('textGrid exists:', !!textGrid);
+        if (!textGrid) {
+            console.error('textGrid not found!');
             return;
         }
-        console.log('Clearing content and inserting text...');
-        contentArea.innerHTML = '';
-        
+        console.log('insertText called with:', text.substring(0, 50) + '...');
+
+        textGrid.innerHTML = '';
+
         this.textGrid = [];
         this.charIndexToPosition = {};
-        
+
         const lines = text.split('\n');
         let lineNumber = 1;
         let currentRowChars = [];
         let globalIndex = 0;
-        
+
         lines.forEach((line, lineIndex) => {
-            // 段落间隔
             if (lineIndex > 0) {
-                // 先渲染当前行
                 if (currentRowChars.length > 0) {
-                    this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+                    this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
                     currentRowChars = [];
                 }
-                
-                // 添加段落分隔
+
                 const gap = document.createElement('div');
                 gap.className = 'paragraph-gap';
                 gap.dataset.para = '第' + this.toChinese(lineIndex + 1) + '段';
-                contentArea.appendChild(gap);
+                textGrid.appendChild(gap);
             }
-            
+
             const chars = line.split('');
-            
+
             chars.forEach((char) => {
                 currentRowChars.push(char);
                 this.textGrid.push(char);
                 globalIndex++;
-                
-                // 如果满一行，渲染这行
+
                 if (currentRowChars.length === PAPER_CONFIG.CHARS_PER_LINE) {
-                    this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+                    this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
                     currentRowChars = [];
                 }
             });
         });
-        
-        // 渲染最后一行
+
         if (currentRowChars.length > 0) {
-            this.renderRow(contentArea, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
+            this.renderRow(textGrid, currentRowChars, lineNumber++, globalIndex - currentRowChars.length);
         }
-        
-        // 添加空行供继续输入
-        this.addEmptyRow(contentArea, lineNumber);
-        
-        // 聚焦到第一个格子
-        const firstCell = contentArea.querySelector('.char-cell');
+
+        this.addEmptyRow(textGrid, lineNumber);
+
+        const firstCell = textGrid.querySelector('.char-cell');
         if (firstCell) {
             this.focusCell(firstCell);
         }
-        
+
         this.updateCharCount();
         this.updateLineNumbers();
     },
