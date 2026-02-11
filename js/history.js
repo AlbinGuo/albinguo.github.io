@@ -129,7 +129,8 @@ const HistoryPage = {
             
             el.querySelector('.view-btn').onclick = (e) => {
                 e.stopPropagation();
-                this.showDetail(item);
+                // 跳转到结果页面
+                window.location.href = `result.html?id=${item.id}`;
             };
             
             el.querySelector('.del-btn').onclick = (e) => {

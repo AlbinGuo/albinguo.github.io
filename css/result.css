@@ -154,6 +154,24 @@
     white-space: pre-wrap;
 }
 
+.essay-header-info {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.essay-header-info .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.essay-header-info .meta {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
 .essay-content .placeholder {
     color: var(--gray-400);
     text-align: center;

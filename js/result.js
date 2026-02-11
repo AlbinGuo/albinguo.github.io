@@ -21,13 +21,20 @@ const ResultPage = {
     
     loadData() {
         try {
-            // 从localStorage读取
-            const stored = localStorage.getItem('lastResult');
-            if (stored) {
-                this.data = JSON.parse(stored);
-                console.log('数据加载成功:', this.data ? '有数据' : '无数据');
+            // 从URL参数获取ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = parseInt(urlParams.get('id'));
+            
+            if (id) {
+                // 从历史记录中查找
+                const history = JSON.parse(localStorage.getItem('gradingHistory') || '[]');
+                this.data = history.find(item => item.id === id);
             } else {
-                console.log('localStorage中没有数据');
+                // 从lastResult读取
+                const stored = localStorage.getItem('lastResult');
+                if (stored) {
+                    this.data = JSON.parse(stored);
+                }
             }
         } catch (e) {
             console.error('数据加载失败:', e);
@@ -79,7 +86,17 @@ const ResultPage = {
     },
     
     render() {
-        const { scores, stats, errors, comments, suggestions, originalText, annotatedText } = this.data;
+        const { scores, stats, errors, comments, suggestions, originalText, annotatedText, title, author } = this.data;
+        
+        // 显示标题和作者
+        const headerInfo = document.getElementById('essayHeaderInfo');
+        const date = new Date(this.data.timestamp).toLocaleDateString();
+        headerInfo.innerHTML = `
+            <div class="title">${title || '未命名'}</div>
+            <div class="meta">
+                ${author ? `👤 ${author} · ` : ''}📅 ${date}
+            </div>
+        `;
         
         // 总分
         this.animateScore('scoreValue', scores.overall, (value, el) => {
@@ -207,7 +224,7 @@ const ResultPage = {
     download() {
         if (!this.data) return;
         
-        const { scores, stats, comments, suggestions, errors, originalText, type, timestamp } = this.data;
+        const { scores, stats, comments, suggestions, errors, originalText, type, timestamp, title, author } = this.data;
         
         const typeNames = {
             narrative: '记叙文',
@@ -218,8 +235,10 @@ const ResultPage = {
         
         let content = `═══════════════════════════════
       智能作文批改结果
-═══════════════════════════════
+══════════════════════════════
 
+作文标题：${title || '未命名'}
+${author ? `姓名：${author}` : ''}
 批改时间：${new Date(timestamp).toLocaleString()}
 作文类型：${typeNames[type] || '未知'}
 总字数：${stats.chars} 字
