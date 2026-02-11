@@ -915,7 +915,7 @@ body {
     flex-wrap: wrap;
 }
 
-.side-comment-item .comment-header span[class*="red"] {
+.side-comment-item .comment-header span[class*="red"]:not(.comment-number) {
     color: #c53030;
 }
 
