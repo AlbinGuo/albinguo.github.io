@@ -410,6 +410,19 @@ body {
     border-color: #059669;
 }
 
+/* Highlight active annotation on click */
+.char-cell.highlight-active {
+    box-shadow: 0 0 0 2px #3b82f6, 0 0 8px rgba(59, 130, 246, 0.4) !important;
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.highlight-active {
+    box-shadow: 0 0 0 3px #3b82f6, 0 0 12px rgba(59, 130, 246, 0.5) !important;
+    transform: scale(1.08);
+    z-index: 100;
+}
+
 /* ========== Tian Grid Style - 田字格 ========== */
 .tian-grid-mode .text-grid-container {
     overflow-x: auto;

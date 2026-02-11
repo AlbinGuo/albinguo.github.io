@@ -1486,7 +1486,7 @@ const App = {
         };
         
         this.elements.sideCommentBody.innerHTML = this.sideComments.map(item => `
-            <div class="side-comment-item ${item.color || 'red'}" data-id="${item.id}">
+            <div class="side-comment-item ${item.color || 'red'}" data-id="${item.id}" onclick="App.highlightAnnotation(${item.id})">
                 <div class="comment-header">
                     <span class="comment-number ${item.color || 'red'}">${item.number}</span>
                     <span class="comment-color-label ${item.color || 'red'}">${colorLabels[item.color] || '纠错'}</span>
@@ -1497,9 +1497,37 @@ const App = {
                             : `第 ${item.lineNum} 行`}
                 </div>
                 <div class="comment-text">${item.comment}</div>
-                <button class="delete-btn" onclick="App.deleteSideComment(${item.id})">×</button>
+                <button class="delete-btn" onclick="event.stopPropagation(); App.deleteSideComment(${item.id})">×</button>
             </div>
         `).join('');
+    },
+    
+    // 点击批注时高亮对应文字
+    highlightAnnotation(id) {
+        const annotation = this.sideComments.find(c => c.id === id);
+        if (!annotation) return;
+        
+        // 清除之前的高亮
+        document.querySelectorAll('.char-cell.highlight-active').forEach(cell => {
+            cell.classList.remove('highlight-active');
+        });
+        
+        // 高亮对应文字范围
+        if (annotation.startIndex !== null) {
+            const endIndex = annotation.endIndex !== null ? annotation.endIndex : annotation.startIndex;
+            for (let i = annotation.startIndex; i <= endIndex; i++) {
+                const cell = this.getCellAtIndex(i);
+                if (cell) {
+                    cell.classList.add('highlight-active');
+                }
+            }
+            
+            // 滚动到对应位置
+            const startCell = this.getCellAtIndex(annotation.startIndex);
+            if (startCell) {
+                startCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     },
     
     deleteSideComment(id) {
