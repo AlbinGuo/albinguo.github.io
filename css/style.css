@@ -385,13 +385,13 @@ body {
 }
 
 .char-cell.has-annotation.highlight-yellow {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: #d97706;
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: #d97706 !important;
 }
 
 .char-cell.has-annotation.highlight-green {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: #059669;
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: #059669 !important;
 }
 
 /* Highlight class for annotations (without has-annotation) */
@@ -412,13 +412,13 @@ body {
 }
 
 .char-cell.selected.has-annotation.highlight-yellow {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: #d97706;
+    background: rgba(245, 158, 11, 0.2) !important;
+    border-color: #d97706 !important;
 }
 
 .char-cell.selected.has-annotation.highlight-green {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: #059669;
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #059669 !important;
 }
 
 /* Highlight active annotation on click - smooth pulsing effect */
@@ -613,6 +613,16 @@ body {
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation:not(.empty) {
     background: rgba(197, 48, 48, 0.25) !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation.highlight-yellow:not(.empty) {
+    background: rgba(245, 158, 11, 0.2) !important;
+    border-color: #d97706 !important;
+}
+
+.tian-grid-mode .text-grid.tian-grid .char-cell.has-annotation.highlight-green:not(.empty) {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #059669 !important;
 }
 
 .char-content {
