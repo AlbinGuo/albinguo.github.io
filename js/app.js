@@ -88,8 +88,14 @@ const App = {
     bindEvents() {
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
+                const page = link.dataset.page;
+                // 历史批改和帮助页面跳转到新页面
+                if (page === 'history' || page === 'help') {
+                    return; // 允许默认跳转行为
+                }
+                // 其他页面在当前页面切换
                 e.preventDefault();
-                this.switchPage(link.dataset.page);
+                this.switchPage(page);
             });
         });
         
