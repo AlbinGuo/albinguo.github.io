@@ -919,11 +919,11 @@ body {
     color: #c53030;
 }
 
-.side-comment-item .comment-header span[class*="yellow"] {
+.side-comment-item .comment-header span[class*="yellow"]:not(.comment-number) {
     color: #d97706;
 }
 
-.side-comment-item .comment-header span[class*="green"] {
+.side-comment-item .comment-header span[class*="green"]:not(.comment-number) {
     color: #059669;
 }
 
