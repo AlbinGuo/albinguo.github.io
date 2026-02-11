@@ -401,12 +401,12 @@ body {
 }
 
 .char-cell.selected.has-annotation.highlight-yellow {
-    background: rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.15);
     border-color: #d97706;
 }
 
 .char-cell.selected.has-annotation.highlight-green {
-    background: rgba(16, 185, 129, 0.25);
+    background: rgba(16, 185, 129, 0.15);
     border-color: #059669;
 }
 
@@ -594,12 +594,12 @@ body {
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.selected.has-annotation.highlight-yellow {
-    background: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.15);
     border-color: #d97706;
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.selected.has-annotation.highlight-green {
-    background: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.15);
     border-color: #059669;
 }
 
