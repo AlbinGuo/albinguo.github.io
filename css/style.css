@@ -410,17 +410,51 @@ body {
     border-color: #059669;
 }
 
-/* Highlight active annotation on click */
+/* Highlight active annotation on click - smooth pulsing effect */
 .char-cell.highlight-active {
-    box-shadow: 0 0 0 2px #3b82f6, 0 0 8px rgba(59, 130, 246, 0.4) !important;
-    transform: scale(1.05);
-    z-index: 10;
+    background: rgba(59, 130, 246, 0.15) !important;
+    animation: highlight-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        background: rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        background: rgba(59, 130, 246, 0.08);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell.highlight-active {
-    box-shadow: 0 0 0 3px #3b82f6, 0 0 12px rgba(59, 130, 246, 0.5) !important;
-    transform: scale(1.08);
-    z-index: 100;
+    background: rgba(59, 130, 246, 0.12) !important;
+    animation: highlight-pulse-tian 1.5s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse-tian {
+    0%, 100% {
+        background: rgba(59, 130, 246, 0.12);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+        background: rgba(59, 130, 246, 0.05);
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+    }
+}
+
+/* Animate the annotation marker */
+.char-cell.highlight-active .annotation-marker {
+    animation: marker-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes marker-pulse {
+    0%, 100% {
+        transform: scale(1.15);
+    }
+    50% {
+        transform: scale(1.3);
+    }
 }
 
 /* ========== Tian Grid Style - 田字格 ========== */
