@@ -267,7 +267,11 @@ const App = {
                 !e.target.closest('.template-btn') && 
                 !e.target.closest('.add-annotation-btn') &&
                 !e.target.closest('.add-comment-btn') &&
-                !e.target.closest('#customComment')) {
+                !e.target.closest('.color-option') &&
+                !e.target.closest('.color-badge') &&
+                !e.target.closest('#customComment') &&
+                !e.target.closest('#commentInput') &&
+                !e.target.closest('.modal')) {
                 // 如果点击的不是格子或批改按钮，取消选择
                 const selection = window.getSelection();
                 if (selection && !selection.anchorNode?.closest?.('.char-cell')) {
