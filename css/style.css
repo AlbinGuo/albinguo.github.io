@@ -196,6 +196,74 @@ body {
     color: var(--primary);
 }
 
+/* View Selector Buttons */
+.view-selector {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.view-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--gray-300);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.view-btn.active {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary);
+}
+
+/* Fullscreen Mode */
+.essay-panel.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    border-radius: 0;
+    height: 100vh !important;
+}
+
+.essay-panel.fullscreen .text-grid-container {
+    max-height: calc(100vh - 80px);
+    overflow: auto;
+}
+
+.essay-panel.fullscreen .panel-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Full Height Mode */
+.essay-panel.full-height {
+    height: 100% !important;
+}
+
+.essay-panel.full-height .text-grid-container {
+    flex: 1;
+    overflow: hidden;
+}
+
 /* Text Grid Container */
 .panel-body {
     flex: 1;

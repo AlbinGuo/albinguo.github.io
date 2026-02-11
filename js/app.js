@@ -81,7 +81,9 @@ const App = {
             commentInput: document.getElementById('commentInput'),
             selectedRangeDisplay: document.getElementById('selectedRangeDisplay'),
             selectedStart: document.getElementById('selectedStart'),
-            selectedEnd: document.getElementById('selectedEnd')
+            selectedEnd: document.getElementById('selectedEnd'),
+            fullscreenBtn: document.getElementById('fullscreenBtn'),
+            fullHeightBtn: document.getElementById('fullHeightBtn')
         };
     },
     
@@ -109,6 +111,16 @@ const App = {
                 btn.classList.add('active');
                 this.switchPaperType(btn.dataset.paper);
             });
+        });
+        
+        // 全屏显示按钮
+        this.elements.fullscreenBtn.addEventListener('click', () => {
+            this.toggleFullscreen();
+        });
+        
+        // 100%高度显示按钮
+        this.elements.fullHeightBtn.addEventListener('click', () => {
+            this.toggleFullHeight();
         });
         
         document.querySelectorAll('.tab').forEach(tab => {
@@ -328,6 +340,44 @@ const App = {
             document.querySelectorAll('.paper-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             this.switchPaperType(savedType);
+        }
+    },
+    
+    // 全屏显示
+    toggleFullscreen() {
+        const essayPanel = document.querySelector('.essay-panel');
+        const btn = this.elements.fullscreenBtn;
+        
+        if (essayPanel.classList.contains('fullscreen')) {
+            essayPanel.classList.remove('fullscreen');
+            btn.classList.remove('active');
+        } else {
+            essayPanel.classList.add('fullscreen');
+            btn.classList.add('active');
+            // 退出全高度模式
+            essayPanel.classList.remove('full-height');
+            document.querySelectorAll('.view-btn').forEach(b => {
+                if (b !== btn) b.classList.remove('active');
+            });
+        }
+    },
+    
+    // 100%高度显示
+    toggleFullHeight() {
+        const essayPanel = document.querySelector('.essay-panel');
+        const btn = this.elements.fullHeightBtn;
+        
+        if (essayPanel.classList.contains('full-height')) {
+            essayPanel.classList.remove('full-height');
+            btn.classList.remove('active');
+        } else {
+            essayPanel.classList.add('full-height');
+            btn.classList.add('active');
+            // 退出全屏模式
+            essayPanel.classList.remove('fullscreen');
+            document.querySelectorAll('.view-btn').forEach(b => {
+                if (b !== btn) b.classList.remove('active');
+            });
         }
     },
     
