@@ -1262,11 +1262,12 @@ const App = {
             const scoreClass = item.scores.overall >= 80 ? 'high' : item.scores.overall >= 60 ? 'medium' : 'low';
             const date = new Date(item.timestamp).toLocaleDateString();
             const isSelected = this.selectedForComparison && this.selectedForComparison.id === item.id;
+            const authorDisplay = item.author ? `👤 ${item.author} · ` : '';
             return `
                 <div class="history-item ${this.comparisonMode ? 'comparison-selectable' : ''} ${isSelected ? 'selected-for-compare' : ''}" data-id="${item.id}">
                     <div class="history-info">
                         <h4>${item.title}</h4>
-                        <div class="history-meta">${date} · ${item.stats.chars}字</div>
+                        <div class="history-meta">${authorDisplay}${date} · ${item.stats.chars}字</div>
                     </div>
                     <div class="history-score">
                         <span class="score-badge ${scoreClass}">
