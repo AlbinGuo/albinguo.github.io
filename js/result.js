@@ -210,7 +210,10 @@ const ResultPage = {
             chars.forEach((char, index) => {
                 const annotation = annotationMap[index];
                 if (annotation) {
-                    essayHTML += `<span class="char-with-annotation ${annotation.color || 'red'}" title="${annotation.comment}">${char}<span class="annotation-badge">${annotation.number}</span></span>`;
+                    // 只在范围的第一个字符上显示标注号
+                    const isFirstInRange = annotation.startIndex === index;
+                    const badgeHTML = isFirstInRange ? `<span class="annotation-badge">${annotation.number}</span>` : '';
+                    essayHTML += `<span class="char-with-annotation ${annotation.color || 'red'}" title="${annotation.comment}">${char}${badgeHTML}</span>`;
                 } else {
                     essayHTML += `<span class="char">${char}</span>`;
                 }
