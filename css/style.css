@@ -298,7 +298,10 @@ body {
 .text-grid {
     padding: 15px 20px;
     min-height: 100%;
-    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-family: "STKaiti", "STKaiti", "楷体", serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .grid-placeholder {
@@ -318,9 +321,12 @@ body {
 
 /* Writing Paper Style - 作文纸效果 */
 .writing-paper {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-width: 100%;
     padding: 0;
+    margin: 0 auto;
 }
 
 .text-grid:not(.tian-grid) .content-area {
@@ -566,6 +572,10 @@ body {
     max-width: calc(56px * 20 + 25px);
     padding: 0;
     background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
 }
 
 .tian-grid-mode .text-grid.tian-grid .char-cell {
