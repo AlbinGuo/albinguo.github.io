@@ -1314,9 +1314,16 @@ const App = {
     // ========== 批改弹窗功能 ==========
     
     openCommentModal() {
+        // 检查是否有选中文字，如果没有，使用第一个非空格子
         if (this.selectedRange.start === null) {
-            this.showToast('请先选中要批改的文字');
-            return;
+            const firstCell = document.querySelector('.char-cell:not(.empty)');
+            if (firstCell) {
+                const firstIdx = parseInt(firstCell.dataset.index);
+                this.selectedRange = { start: firstIdx, end: firstIdx };
+            } else {
+                this.showToast('请先输入作文内容');
+                return;
+            }
         }
         
         // 显示选中的范围
@@ -1506,6 +1513,7 @@ const App = {
                 const remainingMarkers = cell.querySelectorAll('.annotation-marker');
                 if (remainingMarkers.length === 0) {
                     cell.classList.remove('has-annotation');
+                    cell.classList.remove('highlight-red', 'highlight-yellow', 'highlight-green');
                 }
             });
         }
