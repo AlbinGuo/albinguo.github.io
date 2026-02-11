@@ -10,31 +10,17 @@
     <div class="app-container">
         <!-- 顶部导航 -->
         <header class="header">
-            <div class="logo">
-                <svg class="logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                    <path d="M2 2l7.586 7.586"></path>
-                    <circle cx="11" cy="11" r="2"></circle>
-                </svg>
-                <span class="logo-text">智能作文批改</span>
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">✏</span>
+                    <span class="logo-text">智能作文批改</span>
+                </div>
             </div>
-            <nav class="nav">
-                <a href="index.html" class="nav-link active" data-page="edit">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    作文批改
-                </a>
-                <a href="history.html" class="nav-link" data-page="history">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    历史记录
-                </a>
-            </nav>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link active" data-page="edit">作文批改</a>
+                    <a href="history.html" class="nav-link" data-page="history">历史批改</a>
+                    <a href="#" class="nav-link" data-page="help">使用帮助</a>
+                </nav>
         </header>
 
         <!-- 主内容区 -->
@@ -45,56 +31,20 @@
                     <!-- 左侧：作文原文区 -->
                     <div class="essay-panel">
                         <div class="panel-header essay-header">
-                            <h2>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                作文原文
-                            </h2>
+                            <h2>📝 作文原文</h2>
                             <div class="essay-meta">
                                 <div class="meta-inputs">
                                     <input type="text" id="essayTitle" placeholder="输入作文标题..." class="title-input">
                                     <input type="text" id="essayAuthor" placeholder="姓名" class="author-input">
                                 </div>
-                                <span class="char-count" id="charCount">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
-                                        <line x1="9" y1="20" x2="15" y2="20"></line>
-                                        <line x1="12" y1="4" x2="12" y2="20"></line>
-                                    </svg>
-                                    <span>0 字</span>
-                                </span>
+                                <span class="char-count" id="charCount">0 字</span>
                                 <div class="paper-selector">
-                                    <button class="paper-btn" data-paper="writing" title="作文纸">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                        </svg>
-                                    </button>
-                                    <button class="paper-btn active" data-paper="tian" title="田字格">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                                            <line x1="9" y1="21" x2="9" y2="9"></line>
-                                        </svg>
-                                    </button>
+                                    <button class="paper-btn" data-paper="writing" title="作文纸">📄</button>
+                                    <button class="paper-btn active" data-paper="tian" title="田字格">▦</button>
                                 </div>
                                 <div class="view-selector">
-                                    <button class="view-btn" id="fullscreenBtn" title="全屏显示">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="15 3 21 3 21 9"></polyline>
-                                            <polyline points="9 21 3 21 3 15"></polyline>
-                                            <line x1="21" y1="3" x2="14" y2="10"></line>
-                                            <line x1="3" y1="21" x2="10" y2="14"></line>
-                                        </svg>
-                                    </button>
-                                    <button class="view-btn" id="fullHeightBtn" title="100%高度">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="3" x2="12" y2="21"></line>
-                                            <polyline points="21 12 12 21 3 12"></polyline>
-                                        </svg>
-                                    </button>
+                                    <button class="view-btn" id="fullscreenBtn" title="全屏显示">⛶</button>
+                                    <button class="view-btn" id="fullHeightBtn" title="100%高度">↕</button>
                                 </div>
                             </div>
                         </div>
@@ -115,17 +65,8 @@
                     <!-- 中间：旁批区域 -->
                     <div class="side-comment-panel" id="sideCommentPanel">
                         <div class="panel-header">
-                            <h3>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                                批改标注
-                            </h3>
-                            <button class="toggle-btn" id="toggleSideComments">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="18 15 12 9 6 15"></polyline>
-                                </svg>
-                            </button>
+                            <h3>📝 批改标注</h3>
+                            <button class="toggle-btn" id="toggleSideComments">收起 ▼</button>
                         </div>
                         <div class="panel-body" id="sideCommentBody">
                             <div class="side-comment-empty">
@@ -141,26 +82,12 @@
                         <!-- 评语模板 -->
                         <div class="comment-templates">
                             <div class="templates-header">
-                                <span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                    常用评语
-                                </span>
-                                <button class="toggle-templates" id="toggleTemplates">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="18 15 12 9 6 15"></polyline>
-                                    </svg>
-                                </button>
+                                <span>💬 常用评语</span>
+                                <button class="toggle-templates" id="toggleTemplates">▲</button>
                             </div>
                             <div class="templates-body" id="templatesBody">
                                 <div class="template-category">
-                                    <div class="template-category-title">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                                        </svg>
-                                        优点表扬
-                                    </div>
+                                    <div class="template-category-title">👍 优点表扬</div>
                                     <div class="template-list">
                                         <button class="template-btn" data-comment="开头简洁，点明主题，很好！">开头简洁</button>
                                         <button class="template-btn" data-comment="结尾总结到位，升华主题。">结尾升华</button>
@@ -172,10 +99,89 @@
                                         <button class="template-btn" data-comment="用词准确，表达清晰。">用词准确</button>
                                     </div>
                                 </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">🔧 改进建议</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头可以再简洁一些，直接入题。">开头入题</button>
+                                        <button class="template-btn" data-comment="中间内容略显单薄，可增加细节描写。">增加细节</button>
+                                        <button class="template-btn" data-comment="结尾有些仓促，可以更具体地表达情感。">结尾具体</button>
+                                        <button class="template-btn" data-comment="注意错别字，请及时订正。">错别字</button>
+                                        <button class="template-btn" data-comment="语句不够通顺，建议多读几遍。">语句通顺</button>
+                                        <button class="template-btn" data-comment="过渡不够自然，注意段落间的衔接。">段落衔接</button>
+                                        <button class="template-btn" data-comment="描写不够具体，要写出细节。">细节描写</button>
+                                        <button class="template-btn" data-comment="注意标点符号的使用。">标点符号</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">📝 常用评语</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="文章层次分明，条理清晰。">层次分明</button>
+                                        <button class="template-btn" data-comment="书写工整，值得表扬！">书写工整</button>
+                                        <button class="template-btn" data-comment="态度认真，继续保持！">态度认真</button>
+                                        <button class="template-btn" data-comment="进步很大，继续努力！">进步很大</button>
+                                        <button class="template-btn" data-comment="再接再厉，期待更优秀的作品！">再接再厉</button>
+                                    </div>
+                                </div>
                                 <!-- 自定义评语输入 -->
                                 <div class="custom-comment">
                                     <textarea id="customComment" placeholder="输入自定义评语..." rows="2"></textarea>
                                     <button class="add-comment-btn" id="addCustomComment">添加</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="panel-body" id="sideCommentBody">
+                            <div class="side-comment-empty">
+                                <p>批改时点击作文行可在右侧添加旁批</p>
+                            </div>
+                        </div>
+                        <!-- 评语模板 -->
+                        <div class="comment-templates">
+                            <div class="templates-header">
+                                <span>💬 常用评语</span>
+                                <button class="toggle-templates" id="toggleTemplates">▲</button>
+                            </div>
+                            <div class="custom-comment-header">
+                                <button class="custom-comment-btn" id="addCustomCommentHeader">
+                                    <span>✏</span> 自定义评语
+                                </button>
+                            </div>
+                            <div class="templates-body" id="templatesBody">
+                                <div class="template-category">
+                                    <div class="template-category-title">👍 优点表扬</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头简洁，点明主题，很好！">开头简洁</button>
+                                        <button class="template-btn" data-comment="结尾总结到位，升华主题。">结尾升华</button>
+                                        <button class="template-btn" data-comment="中间叙事生动，细节描写精彩！">细节生动</button>
+                                        <button class="template-btn" data-comment="过渡自然，段落衔接流畅。">过渡自然</button>
+                                        <button class="template-btn" data-comment="语言优美，富有感染力。">语言优美</button>
+                                        <button class="template-btn" data-comment="描写细腻，感受真切。">感受真切</button>
+                                        <button class="template-btn" data-comment="想象丰富，构思巧妙。">想象丰富</button>
+                                        <button class="template-btn" data-comment="用词准确，表达清晰。">用词准确</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">🔧 改进建议</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="开头可以再简洁一些，直接入题。">开头入题</button>
+                                        <button class="template-btn" data-comment="中间内容略显单薄，可增加细节描写。">增加细节</button>
+                                        <button class="template-btn" data-comment="结尾有些仓促，可以更具体地表达情感。">结尾具体</button>
+                                        <button class="template-btn" data-comment="注意错别字，请及时订正。">错别字</button>
+                                        <button class="template-btn" data-comment="语句不够通顺，建议多读几遍。">语句通顺</button>
+                                        <button class="template-btn" data-comment="过渡不够自然，注意段落间的衔接。">段落衔接</button>
+                                        <button class="template-btn" data-comment="描写不够具体，要写出细节。">细节描写</button>
+                                        <button class="template-btn" data-comment="注意标点符号的使用。">标点符号</button>
+                                    </div>
+                                </div>
+                                <div class="template-category">
+                                    <div class="template-category-title">📝 常用评语</div>
+                                    <div class="template-list">
+                                        <button class="template-btn" data-comment="文章层次分明，条理清晰。">层次分明</button>
+                                        <button class="template-btn" data-comment="书写工整，值得表扬！">书写工整</button>
+                                        <button class="template-btn" data-comment="态度认真，继续保持！">态度认真</button>
+                                        <button class="template-btn" data-comment="进步很大，继续努力！">进步很大</button>
+                                        <button class="template-btn" data-comment="再接再厉，期待更优秀的作品！">再接再厉</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -186,13 +192,7 @@
                         <!-- 第一栏：综合评价区 -->
                         <div class="evaluation-panel" id="evaluationPanel">
                             <div class="eval-header">
-                                <h3>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
-                                    综合评价
-                                </h3>
+                                <h3>📊 综合评价</h3>
                             </div>
                             <div class="eval-body">
                                 <div class="essay-title-display" id="essayTitleDisplay">
@@ -250,17 +250,8 @@
                         <!-- 第二栏：旁批总评区 -->
                         <div class="summary-panel" id="summaryPanel">
                             <div class="panel-header">
-                                <h3>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                    批语总评
-                                </h3>
-                                <button class="toggle-btn" id="toggleSummary">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </button>
+                                <h3>💬 批语总评</h3>
+                                <button class="toggle-btn" id="toggleSummary">收起 ▲</button>
                             </div>
                             <div class="panel-body" id="summaryBody">
                                 <ul class="summary-list" id="summaryList">
@@ -275,36 +266,12 @@
                         <!-- 第三栏：详细批改区 -->
                         <div class="detail-panel" id="detailPanel">
                             <div class="panel-header">
-                                <h3>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                                    </svg>
-                                    详细批改
-                                </h3>
+                                <h3>📋 详细批改</h3>
                                 <div class="filter-tabs">
                                     <button class="tab active" data-filter="all">全部</button>
-                                    <button class="tab" data-filter="error">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <line x1="15" y1="9" x2="9" y2="15"></line>
-                                            <line x1="9" y1="9" x2="15" y2="15"></line>
-                                        </svg>
-                                    </button>
-                                    <button class="tab" data-filter="suggest">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="tab" data-filter="praise">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                    </button>
+                                    <button class="tab" data-filter="error">✗ 错误</button>
+                                    <button class="tab" data-filter="suggest">🔧 建议</button>
+                                    <button class="tab" data-filter="praise">✓ 表扬</button>
                                 </div>
                             </div>
                             <div class="panel-body">

@@ -267,16 +267,15 @@ const App = {
         // 全局粘贴事件
         document.addEventListener('paste', (e) => {
             const active = document.activeElement;
-            const inCharCell = active?.closest?.('.char-cell');
-            const inTitleInput = active?.closest?.('#essayTitle');
-            const inAuthorInput = active?.closest?.('#essayAuthor');
-
-            if (inCharCell || inTitleInput || inAuthorInput) return;
-
+            const inCharCell = active.closest('.char-cell');
+            const inTitleCell = active.closest('#titleCell');
+            const inAuthorCell = active.closest('#authorCell');
+            
+            if (inCharCell || inTitleCell || inAuthorCell) return;
+            
             e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData)?.getData('text');
+            const text = (e.clipboardData || window.clipboardData).getData('text');
             if (text) {
-                console.log('Pasting text:', text.substring(0, 30) + '...');
                 this.insertText(text);
             }
         });
@@ -413,27 +412,51 @@ const App = {
     initTextGrid() {
         this.textGrid = [];
         this.charIndexToPosition = {};
-
+        
         const container = this.elements.textGrid;
-        if (!container) return;
-
+        
         container.innerHTML = `
             <div class="writing-paper" id="writingPaper">
+                <div class="title-area" id="titleArea">
+                    <div class="title-row">
+                        <div class="title-cell" id="titleCell">
+                            <span class="title-placeholder">在此输入标题</span>
+                        </div>
+                    </div>
+                    <div class="author-row">
+                        <span class="author-label">姓名：</span>
+                        <div class="author-cell" id="authorCell" contenteditable="true"></div>
+                    </div>
+                </div>
                 <div class="content-area" id="contentArea"></div>
             </div>
         `;
-
+        
         const contentArea = document.getElementById('contentArea');
-
-        contentArea?.addEventListener('click', (e) => {
-            if (e.target === contentArea ||
+        const titleCell = document.getElementById('titleCell');
+        
+        // 点击内容区域聚焦
+        contentArea.addEventListener('click', (e) => {
+            if (e.target === contentArea || 
                 e.target.classList.contains('char-row') ||
                 e.target.classList.contains('line-number')) {
                 const firstCell = contentArea.querySelector('.char-cell');
                 if (firstCell) this.focusCell(firstCell);
             }
         });
-
+        
+        titleCell.addEventListener('click', () => {
+            const placeholder = titleCell.querySelector('.title-placeholder');
+            if (placeholder) {
+                placeholder.remove();
+                titleCell.focus();
+            }
+        });
+        
+        titleCell.addEventListener('input', () => {
+            this.elements.essayTitle.value = titleCell.textContent.trim();
+        });
+        
         this.showPlaceholder();
     },
     
